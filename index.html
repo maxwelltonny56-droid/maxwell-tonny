@@ -1,1265 +1,251 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SmartBiz | Smart Shopping</title>
-
+<meta name="description" content="SmartBiz: quality electronics, fashion, home, school and sports products at fair prices, delivered from Ruiru, Kenya.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:Arial,sans-serif;
-}
-
-body{
-    background:#f5f5f5;
-    color:#222;
-}
-
-header{
-    background:#111;
-    color:white;
-    padding:18px 7%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    position:sticky;
-    top:0;
-    z-index:1000;
-}
-
-.logo{
-    font-size:28px;
-    font-weight:bold;
-    color:#00c853;
-}
-
-nav a{
-    color:white;
-    text-decoration:none;
-    margin-left:20px;
-    font-weight:bold;
-}
-
-nav a:hover{
-    color:#00c853;
-}
-
-.hero{
-    min-height:430px;
-    background:
-    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
-    url("smartbiz-home.jpg") center/cover;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    color:white;
-    padding:30px;
-}
-
-.hero h1{
-    font-size:48px;
-    margin-bottom:15px;
-}
-
-.hero p{
-    font-size:20px;
-    margin-bottom:25px;
-}
-
-.btn{
-    border:none;
-    padding:12px 20px;
-    border-radius:7px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.green{
-    background:#00c853;
-    color:white;
-}
-
-.green:hover{
-    background:#00a844;
-}
-
-.container{
-    width:90%;
-    max-width:1200px;
-    margin:40px auto;
-}
-
-.section-title{
-    text-align:center;
-    margin-bottom:25px;
-    font-size:30px;
-}
-
-.search-box{
-    display:flex;
-    justify-content:center;
-    margin-bottom:25px;
-}
-
-.search-box input{
-    width:80%;
-    max-width:500px;
-    padding:14px;
-    border:1px solid #ccc;
-    border-radius:8px;
-    font-size:16px;
-}
-
-.categories{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:30px;
-}
-
-.categories button{
-    padding:10px 18px;
-    border:none;
-    border-radius:20px;
-    background:#ddd;
-    cursor:pointer;
-}
-
-.categories button.active,
-.categories button:hover{
-    background:#00c853;
-    color:white;
-}
-
-.products{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:22px;
-}
-
-.product{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 4px 12px rgba(0,0,0,.1);
-    transition:.3s;
-}
-
-.product:hover{
-    transform:translateY(-5px);
-}
-
-.product img{
-    width:100%;
-    height:190px;
-    object-fit:cover;
-}
-
-.product-info{
-    padding:18px;
-}
-
-.product-info h3{
-    margin-bottom:8px;
-}
-
-.price{
-    color:#00a844;
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:12px;
-}
-
-.product-info button{
-    width:100%;
-}
-
-.about,
-.contact{
-    background:white;
-    padding:30px;
-    border-radius:12px;
-    margin-top:40px;
-    text-align:center;
-}
-
-footer{
-    background:#111;
-    color:white;
-    text-align:center;
-    padding:25px;
-    margin-top:50px;
-}
-
-/* CART */
-
-.cart-panel{
-    position:fixed;
-    right:-450px;
-    top:0;
-    width:420px;
-    max-width:95%;
-    height:100%;
-    background:white;
-    z-index:2000;
-    box-shadow:-5px 0 20px rgba(0,0,0,.3);
-    padding:25px;
-    overflow-y:auto;
-    transition:.3s;
-}
-
-.cart-panel.open{
-    right:0;
-}
-
-.cart-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-}
-
-.close{
-    background:#e53935;
-    color:white;
-    border:none;
-    padding:8px 12px;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-.cart-item{
-    border-bottom:1px solid #ddd;
-    padding:15px 0;
-}
-
-.cart-item-top{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-}
-
-.quantity{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-top:10px;
-}
-
-.quantity button{
-    width:30px;
-    height:30px;
-    border:none;
-    border-radius:5px;
-    background:#00c853;
-    color:white;
-    cursor:pointer;
-    font-size:18px;
-}
-
-.remove{
-    background:#e53935;
-    color:white;
-    border:none;
-    padding:6px 10px;
-    border-radius:5px;
-    cursor:pointer;
-    margin-top:10px;
-}
-
-.cart-total{
-    font-size:22px;
-    font-weight:bold;
-    margin:20px 0;
-}
-
-.checkout{
-    display:none;
-    margin-top:20px;
-    border-top:2px solid #ddd;
-    padding-top:20px;
-}
-
-.checkout input,
-.checkout textarea{
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
-
-.mpesa-box{
-    background:#e8f5e9;
-    border:1px solid #00c853;
-    padding:15px;
-    border-radius:10px;
-    margin-top:15px;
-}
-
-.mpesa-title{
-    color:#008c3a;
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:8px;
-}
-
-.mpesa-btn{
-    width:100%;
-    background:#00a844;
-    color:white;
-    border:none;
-    padding:14px;
-    border-radius:7px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
-}
-
-.mpesa-btn:hover{
-    background:#008c3a;
-}
-
-.whatsapp-btn{
-    width:100%;
-    background:#25D366;
-    color:white;
-    border:none;
-    padding:14px;
-    border-radius:7px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
-}
-
-.cart-button{
-    background:#00c853;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:7px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.note{
-    font-size:13px;
-    color:#666;
-    margin-top:8px;
-}
-
-@media(max-width:700px){
-    header{
-        flex-direction:column;
-        gap:12px;
-    }
-
-    nav a{
-        margin:0 7px;
-    }
-
-    .hero h1{
-        font-size:35px;
-    }
-}
+:root{--ink:#16201b;--muted:#5d6b63;--line:#dfe6e1;--bg:#f6f8f6;--card:#fff;--green:#0e7a46;--green-d:#0a5a34;--sun:#ffc83d;--red:#c0392b}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;background:var(--green-d);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 5vw}
+.logo{font-weight:800;font-size:1.35rem;text-decoration:none}
+nav{display:flex;gap:18px;align-items:center}
+nav a{text-decoration:none;font-weight:600;font-size:.95rem}
+nav a:hover{color:var(--sun)}
+.cartbtn{background:var(--sun);color:var(--ink);border:0;border-radius:999px;padding:8px 16px;font:inherit;font-weight:800;cursor:pointer}
+.hero{background:var(--green);color:#fff;padding:64px 5vw 56px}
+.hero h1{font-size:clamp(2.2rem,6vw,4.2rem);font-weight:800;line-height:1.05;max-width:14ch}
+.hero p{margin:14px 0 24px;font-size:1.15rem;max-width:42ch;opacity:.95}
+.btn{display:inline-block;background:var(--sun);color:var(--ink);border:0;border-radius:10px;padding:12px 22px;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+.perks{display:flex;flex-wrap:wrap;gap:10px 28px;padding:14px 5vw;background:#fff;border-bottom:1px solid var(--line);font-weight:600;font-size:.92rem}
+section{padding:44px 5vw}
+h2{font-size:1.9rem;font-weight:800;margin-bottom:18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font:inherit;font-weight:600;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+#search{flex:1;min-width:180px;max-width:320px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.pic{aspect-ratio:1;background:#e9f1ec;display:grid;place-items:center;font-size:4rem}
+.pic img{width:100%;height:100%;object-fit:cover}
+.info{padding:14px;display:flex;flex-direction:column;gap:4px;flex:1}
+.info h3{font-size:1.05rem}
+.cat{color:var(--muted);font-size:.85rem}
+.price{font-weight:800;font-size:1.15rem;margin:4px 0 10px}
+.add{margin-top:auto;background:var(--green);color:#fff;border:0;border-radius:10px;padding:10px;font:inherit;font-weight:700;cursor:pointer}
+.add:hover{background:var(--green-d)}
+.empty{color:var(--muted);padding:30px 0}
+.about,.contact{max-width:760px}
+.about p{font-size:1.1rem}
+.contact ul{list-style:none;padding:0;display:grid;gap:8px;font-size:1.05rem}
+footer{background:var(--ink);color:#cfd8d3;text-align:center;padding:22px 5vw;font-size:.9rem}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:#fff;z-index:40;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:1.3rem}
+.x{background:none;border:0;font-size:1.5rem;cursor:pointer}
+.items{flex:1;overflow:auto;padding:12px 20px}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row b{font-weight:600}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:#fff;font-weight:800;cursor:pointer}
+.rm{background:none;border:0;color:var(--red);font:inherit;font-size:.85rem;cursor:pointer;text-decoration:underline}
+.pay{padding:16px 20px;border-top:1px solid var(--line);display:grid;gap:10px}
+.total{display:flex;justify-content:space-between;font-weight:800;font-size:1.2rem}
+.pay input{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;width:100%}
+.pay .btn{width:100%;text-align:center}
+.mpesa{background:var(--green);color:#fff}
+.wa{background:#25d366;color:#08311a}
+.ghost{background:none;border:0;color:var(--muted);font:inherit;text-decoration:underline;cursor:pointer}
+#msg{font-size:.9rem;min-height:1.3em}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;z-index:50;transition:transform .25s;font-weight:600}
+.toast.on{transform:translateX(-50%)}
+@media(max-width:560px){nav a{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
-
 <body>
 
 <header>
-    <div class="logo">SmartBiz 🛒</div>
-
-    <nav>
-        <a href="#home">Home</a>
-        <a href="#products">Products</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-
-        <button class="cart-button" onclick="openCart()">
-            🛒 Cart (<span id="cartCount">0</span>)
-        </button>
-    </nav>
+  <a class="logo" href="#home">SmartBiz 🛒</a>
+  <nav>
+    <a href="#products">Products</a><a href="#about">About</a><a href="#contact">Contact</a>
+    <button class="cartbtn" id="openCart" aria-label="Open cart">Cart (<span id="count">0</span>)</button>
+  </nav>
 </header>
 
+<main id="home">
+  <div class="hero">
+    <h1>Smart shopping. Better prices.</h1>
+    <p>Phones, fashion, school and sports gear, delivered from Ruiru. Pay with M-PESA or order on WhatsApp.</p>
+    <a class="btn" href="#products">Shop now</a>
+  </div>
+  <div class="perks"><span>🚚 Delivery within Kenya</span><span>📱 Pay with M-PESA</span><span>💬 Order on WhatsApp</span></div>
 
-<section class="hero" id="home">
-    <div>
-        <h1>Welcome to SmartBiz</h1>
-        <p>Smart Shopping. Better Prices. Easy Delivery.</p>
-        <a href="#products">
-            <button class="btn green">Shop Now</button>
-        </a>
+  <section id="products">
+    <h2>Our products</h2>
+    <div class="bar">
+      <div class="chips" id="chips"></div>
+      <input id="search" type="search" placeholder="Search products" aria-label="Search products">
     </div>
-</section>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="none" hidden>No products match your search. Try another word or choose All.</p>
+  </section>
 
+  <section id="about" class="about">
+    <h2>About SmartBiz</h2>
+    <p>SmartBiz is an online shop that sells quality products at affordable prices, with delivery from Ruiru, Kiambu County.</p>
+  </section>
 
-<section class="container" id="products">
+  <section id="contact" class="contact">
+    <h2>Contact SmartBiz</h2>
+    <ul>
+      <li>📞 <a href="tel:+254758209823">0758 209 823</a></li>
+      <li>📧 <a href="mailto:maxwelltonny56@gmail.com">maxwelltonny56@gmail.com</a></li>
+      <li>📍 Ruiru, Kiambu County, Kenya</li>
+    </ul>
+  </section>
+</main>
 
-    <h2 class="section-title">Our Products</h2>
+<footer>© 2026 SmartBiz. Developed by Maxwell Tonny. All rights reserved.</footer>
 
-    <div class="search-box">
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="🔍 Search products..."
-            onkeyup="searchProducts()"
-        >
-    </div>
-
-    <div class="categories">
-        <button class="active" onclick="filterProducts('all',this)">All</button>
-        <button onclick="filterProducts('electronics',this)">Electronics</button>
-        <button onclick="filterProducts('fashion',this)">Fashion</button>
-        <button onclick="filterProducts('home',this)">Home</button>
-        <button onclick="filterProducts('school',this)">School</button>
-        <button onclick="filterProducts('sports',this)">Sports</button>
-        <button onclick="filterProducts('tech',this)">Tech</button>
-    </div>
-
-
-    <div class="products" id="productList">
-
-        <div class="product" data-category="electronics">
-            <img src="product7 samsung.jpg">
-            <div class="product-info">
-                <h3>Smartphone</h3>
-                <p class="price">KSh 20,000</p>
-                <button class="btn green"
-                onclick="add('Smartphone',20000)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="electronics">
-            <img src="product2 phone acc.jpg">
-            <div class="product-info">
-                <h3>Phone Accessory</h3>
-                <p class="price">KSh 800</p>
-                <button class="btn green"
-                onclick="add('Phone Accessory',800)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="electronics">
-            <img src="product4 earbuds.jpg">
-            <div class="product-info">
-                <h3>Wireless Earbuds</h3>
-                <p class="price">KSh 2,000</p>
-                <button class="btn green"
-                onclick="add('Wireless Earbuds',2000)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="electronics">
-            <img src="product5 smartwatch.jpg">
-            <div class="product-info">
-                <h3>Smart Watch</h3>
-                <p class="price">KSh 2,500</p>
-                <button class="btn green"
-                onclick="add('Smart Watch',2500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="electronics">
-            <img src="product1 water bottle.jpg">
-            <div class="product-info">
-                <h3>Bluetooth Speaker</h3>
-                <p class="price">KSh 1,500</p>
-                <button class="btn green"
-                onclick="add('Bluetooth Speaker',1500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="electronics">
-            <img src="product3 led light.jpg">
-            <div class="product-info">
-                <h3>Power Bank</h3>
-                <p class="price">KSh 1,800</p>
-                <button class="btn green"
-                onclick="add('Power Bank',1800)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="fashion">
-            <div class="product-info">
-                <h3>T-Shirt</h3>
-                <p class="price">KSh 1,000</p>
-                <button class="btn green"
-                onclick="add('T-Shirt',1000)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="fashion">
-            <div class="product-info">
-                <h3>Casual Outfit</h3>
-                <p class="price">KSh 2,500</p>
-                <button class="btn green"
-                onclick="add('Casual Outfit',2500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="fashion">
-            <div class="product-info">
-                <h3>Sneakers</h3>
-                <p class="price">KSh 3,500</p>
-                <button class="btn green"
-                onclick="add('Sneakers',3500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="fashion">
-            <div class="product-info">
-                <h3>Backpack</h3>
-                <p class="price">KSh 1,500</p>
-                <button class="btn green"
-                onclick="add('Backpack',1500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="home">
-            <div class="product-info">
-                <h3>Water Bottle</h3>
-                <p class="price">KSh 600</p>
-                <button class="btn green"
-                onclick="add('Water Bottle',600)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="home">
-            <div class="product-info">
-                <h3>LED Light</h3>
-                <p class="price">KSh 300</p>
-                <button class="btn green"
-                onclick="add('LED Light',300)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="school">
-            <div class="product-info">
-                <h3>Notebook</h3>
-                <p class="price">KSh 150</p>
-                <button class="btn green"
-                onclick="add('Notebook',150)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="school">
-            <div class="product-info">
-                <h3>Scientific Calculator</h3>
-                <p class="price">KSh 1,200</p>
-                <button class="btn green"
-                onclick="add('Scientific Calculator',1200)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="sports">
-            <div class="product-info">
-                <h3>Football</h3>
-                <p class="price">KSh 1,500</p>
-                <button class="btn green"
-                onclick="add('Football',1500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="sports">
-            <div class="product-info">
-                <h3>Basketball</h3>
-                <p class="price">KSh 2,000</p>
-                <button class="btn green"
-                onclick="add('Basketball',2000)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="tech">
-            <div class="product-info">
-                <h3>Laptop Stand</h3>
-                <p class="price">KSh 1,500</p>
-                <button class="btn green"
-                onclick="add('Laptop Stand',1500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="product" data-category="tech">
-            <div class="product-info">
-                <h3>Laptop Accessories</h3>
-                <p class="price">KSh 2,500</p>
-                <button class="btn green"
-                onclick="add('Laptop Accessories',2500)">
-                Add to Cart
-                </button>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-
-<section class="container" id="about">
-    <div class="about">
-        <h2>About SmartBiz</h2>
-        <br>
-        <p>
-            SmartBiz is an online shopping platform providing
-            quality products at affordable prices.
-        </p>
-    </div>
-</section>
-
-
-<section class="container" id="contact">
-    <div class="contact">
-        <h2>Contact SmartBiz</h2>
-        <br>
-        <p>📞 0758209823</p>
-        <p>📧 maxwelltonny56@gmail.com</p>
-        <p>📍 Ruiru, Kiambu County, Kenya</p>
-    </div>
-</section>
-
-
-<footer>
-    <p>© 2026 SmartBiz. Developed By Maxwell Tonny. All Rights Reserved.</p>
-</footer>
-
-
-<!-- CART -->
-
-<div class="cart-panel" id="cartPanel">
-
-    <div class="cart-header">
-        <h2>🛒 Your Cart</h2>
-
-        <button class="close" onclick="closeCart()">✕</button>
-    </div>
-
-    <div id="cartItems"></div>
-
-    <div class="cart-total">
-        Total: KSh <span id="cartTotal">0</span>
-    </div>
-
-    <button class="btn green"
-    style="width:100%;"
-    onclick="showCheckout()">
-    Proceed to Checkout
-    </button>
-
-    <button class="btn"
-    style="width:100%;margin-top:10px;background:#ddd;"
-    onclick="clearCart()">
-    Clear Cart
-    </button>
-
-
-    <!-- CHECKOUT -->
-
-    <div class="checkout" id="checkout">
-
-        <h2>Checkout</h2>
-
-        <input
-            type="text"
-            id="customerName"
-            placeholder="Full Name"
-        >
-
-        <input
-            type="tel"
-            id="customerPhone"
-            placeholder="M-PESA Phone Number e.g. 0712345678"
-        >
-
-        <input
-            type="text"
-            id="deliveryLocation"
-            placeholder="Delivery Location"
-        >
-
-        <textarea
-            id="customerNote"
-            rows="3"
-            placeholder="Additional note (optional)"
-        ></textarea>
-
-
-        <!-- MPESA -->
-
-        <div class="mpesa-box">
-
-            <div class="mpesa-title">
-                📱 Pay with M-PESA
-            </div>
-
-            <p>
-                Enter your M-PESA number above and
-                click the button below.
-            </p>
-
-            <p class="note">
-                M-PESA STK Push will be connected through
-                the SmartBiz backend.
-            </p>
-
-            <button
-                class="mpesa-btn"
-                onclick="payMpesa()">
-                📱 Pay KSh <span id="mpesaAmount">0</span> with M-PESA
-            </button>
-
-        </div>
-
-
-        <button
-            class="whatsapp-btn"
-            onclick="sendWhatsApp()">
-            💬 Place Order on WhatsApp
-        </button>
-
-    </div>
-
-</div>
-
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Your cart">
+  <div class="dh"><h2>Your cart</h2><button class="x" id="closeCart" aria-label="Close cart">✕</button></div>
+  <div class="items" id="items"></div>
+  <div class="pay">
+    <div class="total"><span>Total</span><span id="total">KSh 0</span></div>
+    <input id="name" placeholder="Your name" autocomplete="name">
+    <input id="loc" placeholder="Delivery location (e.g. Ruiru, Kimbo)" autocomplete="street-address">
+    <input id="phone" type="tel" inputmode="numeric" placeholder="M-PESA number (07XX XXX XXX)" autocomplete="tel">
+    <button class="btn mpesa" id="payBtn">Pay with M-PESA</button>
+    <button class="btn wa" id="waBtn">Order on WhatsApp</button>
+    <p id="msg" role="status"></p>
+    <button class="ghost" id="clear">Clear cart</button>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
+/* ===== SETTINGS ===== */
+const WHATSAPP = "254758209823";
+// Paste your deployed backend URL here when it is ready (see notes). Empty = M-PESA button explains it is not live yet.
+const MPESA_BACKEND = "https://smartbiz-backend-iz1h.onrender.com/pay";
 
-let cart = [];
+/* ===== PRODUCTS =====
+   img: file name in the same folder as index.html (spaces are handled). Leave "" to show an icon until you add a photo. */
+const PRODUCTS = [
+  {id:1, name:"Smartphone", price:20000, cat:"Electronics", icon:"📱", img:"product7 samsung.jpg"},
+  {id:2, name:"Phone Accessory", price:800, cat:"Electronics", icon:"🔌", img:"product2 phone acc.jpg"},
+  {id:3, name:"Wireless Earbuds", price:2000, cat:"Electronics", icon:"🎧", img:"product4 earbuds.jpg"},
+  {id:4, name:"Smart Watch", price:2500, cat:"Tech", icon:"⌚", img:"product5 smartwatch.jpg"},
+  {id:5, name:"Bluetooth Speaker", price:1500, cat:"Electronics", icon:"🔊", img:""},
+  {id:6, name:"Power Bank", price:1800, cat:"Tech", icon:"🔋", img:""},
+  {id:7, name:"T-Shirt", price:1000, cat:"Fashion", icon:"👕", img:""},
+  {id:8, name:"Casual Outfit", price:2500, cat:"Fashion", icon:"👗", img:""},
+  {id:9, name:"Sneakers", price:3500, cat:"Fashion", icon:"👟", img:""},
+  {id:10, name:"Backpack", price:1500, cat:"School", icon:"🎒", img:""},
+  {id:11, name:"Water Bottle", price:600, cat:"Home", icon:"🧴", img:"product1 water bottle.jpg"},
+  {id:12, name:"LED Light", price:300, cat:"Home", icon:"💡", img:"product3 led light.jpg"},
+  {id:13, name:"Notebook", price:150, cat:"School", icon:"📓", img:""},
+  {id:14, name:"Scientific Calculator", price:1200, cat:"School", icon:"🧮", img:""},
+  {id:15, name:"Football", price:1500, cat:"Sports", icon:"⚽", img:""},
+  {id:16, name:"Basketball", price:2000, cat:"Sports", icon:"🏀", img:""},
+  {id:17, name:"Laptop Stand", price:1500, cat:"Tech", icon:"💻", img:""},
+  {id:18, name:"Laptop Accessories", price:2500, cat:"Tech", icon:"🖱️", img:""}
+];
 
+const $ = s => document.querySelector(s);
+const ksh = n => "KSh " + n.toLocaleString("en-KE");
+let cart = {}; try { cart = JSON.parse(localStorage.getItem("sb_cart") || "{}"); } catch(e){}
+let cat = "All", q = "";
 
-/* ADD PRODUCT */
+/* ===== CATALOG ===== */
+const cats = ["All", ...new Set(PRODUCTS.map(p => p.cat))];
+$("#chips").innerHTML = cats.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===cat}">${c}</button>`).join("");
+$("#chips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; cat = b.dataset.c;
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x===b)); render(); };
+$("#search").oninput = e => { q = e.target.value.toLowerCase().trim(); render(); };
 
-function add(name,price){
-
-    const existing = cart.find(item => item.name === name);
-
-    if(existing){
-
-        existing.quantity++;
-
-    }else{
-
-        cart.push({
-            name:name,
-            price:price,
-            quantity:1
-        });
-
-    }
-
-    updateCart();
-
-    alert(name + " added to cart 🛒");
-
+function render(){
+  const list = PRODUCTS.filter(p => (cat==="All"||p.cat===cat) && p.name.toLowerCase().includes(q));
+  $("#none").hidden = list.length > 0;
+  $("#grid").innerHTML = list.map(p => `
+    <article class="card">
+      <div class="pic">${p.img ? `<img src="${encodeURI(p.img)}" alt="${p.name}" loading="lazy" onerror="this.replaceWith('${p.icon}')">` : p.icon}</div>
+      <div class="info"><h3>${p.name}</h3><span class="cat">${p.cat}</span>
+        <span class="price">${ksh(p.price)}</span>
+        <button class="add" data-id="${p.id}">Add to cart</button></div>
+    </article>`).join("");
 }
+$("#grid").onclick = e => { const b = e.target.closest(".add"); if(b){ add(+b.dataset.id); } };
 
+/* ===== CART ===== */
+const save = () => { try{ localStorage.setItem("sb_cart", JSON.stringify(cart)); }catch(e){} };
+function add(id){ cart[id] = (cart[id]||0) + 1; save(); paint(); toast(PRODUCTS.find(p=>p.id===id).name + " added to cart"); }
+const lines = () => Object.entries(cart).map(([id,n]) => ({p:PRODUCTS.find(x=>x.id==id), n})).filter(l => l.p);
+const total = () => lines().reduce((s,l) => s + l.p.price*l.n, 0);
 
-/* UPDATE CART */
-
-function updateCart(){
-
-    const cartItems =
-        document.getElementById("cartItems");
-
-    const cartCount =
-        document.getElementById("cartCount");
-
-    const cartTotal =
-        document.getElementById("cartTotal");
-
-    const mpesaAmount =
-        document.getElementById("mpesaAmount");
-
-
-    cartItems.innerHTML = "";
-
-    let total = 0;
-    let count = 0;
-
-
-    cart.forEach((item,index)=>{
-
-        const itemTotal =
-            item.price * item.quantity;
-
-        total += itemTotal;
-
-        count += item.quantity;
-
-
-        cartItems.innerHTML += `
-
-        <div class="cart-item">
-
-            <div class="cart-item-top">
-
-                <div>
-                    <strong>${item.name}</strong>
-
-                    <br>
-
-                    KSh ${item.price.toLocaleString()}
-                </div>
-
-                <strong>
-                    KSh ${itemTotal.toLocaleString()}
-                </strong>
-
-            </div>
-
-
-            <div class="quantity">
-
-                <button
-                onclick="changeQuantity(${index},-1)">
-                −
-                </button>
-
-                <strong>
-                ${item.quantity}
-                </strong>
-
-                <button
-                onclick="changeQuantity(${index},1)">
-                +
-                </button>
-
-            </div>
-
-
-            <button
-            class="remove"
-            onclick="removeItem(${index})">
-            Remove
-            </button>
-
-        </div>
-
-        `;
-
-    });
-
-
-    if(cart.length === 0){
-
-        cartItems.innerHTML =
-        "<p>Your cart is empty 😅</p>";
-
-    }
-
-
-    cartCount.textContent = count;
-
-    cartTotal.textContent =
-        total.toLocaleString();
-
-    mpesaAmount.textContent =
-        total.toLocaleString();
-
+function paint(){
+  const L = lines();
+  $("#count").textContent = L.reduce((s,l)=>s+l.n,0);
+  $("#total").textContent = ksh(total());
+  $("#items").innerHTML = L.length ? L.map(({p,n}) => `
+    <div class="row"><b>${p.name}</b><span>${ksh(p.price*n)}</span>
+      <div class="qty"><button data-a="dec" data-id="${p.id}" aria-label="Decrease">−</button><span>${n}</span><button data-a="inc" data-id="${p.id}" aria-label="Increase">+</button></div>
+      <button class="rm" data-a="rm" data-id="${p.id}">Remove</button></div>`).join("")
+    : `<p class="empty">Your cart is empty. Add a product to get started.</p>`;
 }
+$("#items").onclick = e => { const b = e.target.closest("[data-a]"); if(!b) return; const id = b.dataset.id;
+  if(b.dataset.a==="inc") cart[id]++; else if(b.dataset.a==="dec"){ if(--cart[id] < 1) delete cart[id]; } else delete cart[id];
+  save(); paint(); };
+$("#clear").onclick = () => { cart = {}; save(); paint(); };
 
+const drawer = on => { $("#drawer").classList.toggle("on", on); $("#scrim").classList.toggle("on", on); };
+$("#openCart").onclick = () => drawer(true);
+$("#closeCart").onclick = $("#scrim").onclick = () => drawer(false);
+document.addEventListener("keydown", e => { if(e.key==="Escape") drawer(false); });
 
-/* CHANGE QUANTITY */
+function toast(t){ const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(()=>el.classList.remove("on"), 1800); }
+const say = (t, bad) => { const m = $("#msg"); m.textContent = t; m.style.color = bad ? "var(--red)" : "var(--green-d)"; };
 
-function changeQuantity(index,amount){
-
-    cart[index].quantity += amount;
-
-    if(cart[index].quantity <= 0){
-
-        cart.splice(index,1);
-
-    }
-
-    updateCart();
-
+/* ===== CHECKOUT ===== */
+function orderText(){
+  const L = lines().map(({p,n}) => `• ${n} x ${p.name} - ${ksh(p.price*n)}`).join("\n");
+  return `Hello SmartBiz, I would like to order:\n${L}\nTotal: ${ksh(total())}\nName: ${$("#name").value||"-"}\nDelivery location: ${$("#loc").value||"-"}`;
 }
-
-
-/* REMOVE */
-
-function removeItem(index){
-
-    cart.splice(index,1);
-
-    updateCart();
-
-}
-
-
-/* CLEAR */
-
-function clearCart(){
-
-    cart = [];
-
-    updateCart();
-
-}
-
-
-/* OPEN CART */
-
-function openCart(){
-
-    document
-    .getElementById("cartPanel")
-    .classList.add("open");
-
-}
-
-
-/* CLOSE CART */
-
-function closeCart(){
-
-    document
-    .getElementById("cartPanel")
-    .classList.remove("open");
-
-}
-
-
-/* CHECKOUT */
-
-function showCheckout(){
-
-    if(cart.length === 0){
-
-        alert("Your cart is empty!");
-
-        return;
-
-    }
-
-    document
-    .getElementById("checkout")
-    .style.display = "block";
-
-}
-
-
-/* MPESA */
-
-function payMpesa(){
-
-    if(cart.length === 0){
-
-        alert("Your cart is empty!");
-
-        return;
-
-    }
-
-
-    const name =
-        document.getElementById("customerName").value.trim();
-
-    const phone =
-        document.getElementById("customerPhone").value.trim();
-
-    const location =
-        document.getElementById("deliveryLocation").value.trim();
-
-
-    if(!name || !phone || !location){
-
-        alert(
-        "Please enter your name, M-PESA phone number and delivery location."
-        );
-
-        return;
-
-    }
-
-
-    if(!/^07\d{8}$/.test(phone) &&
-       !/^01\d{8}$/.test(phone)){
-
-        alert(
-        "Please enter a valid Kenyan phone number."
-        );
-
-        return;
-
-    }
-
-
-    const total =
-        cart.reduce(
-            (sum,item)=>
-            sum + item.price * item.quantity,
-            0
-        );
-
-
-    /*
-      IMPORTANT:
-
-      This is where the real Daraja STK Push
-      backend endpoint will be connected.
-
-      Example:
-
-      fetch("https://YOUR-BACKEND.com/api/mpesa", {
-          method:"POST",
-          headers:{
-              "Content-Type":"application/json"
-          },
-          body:JSON.stringify({
-              name:name,
-              phone:phone,
-              amount:total
-          })
-      })
-
-      Do NOT put your Daraja Consumer Secret,
-      Passkey or other private credentials here.
-    */
-
-
-    alert(
-        "M-PESA checkout is ready! 📱\n\n" +
-        "Amount: KSh " +
-        total.toLocaleString() +
-        "\nPhone: " +
-        phone +
-        "\n\n" +
-        "The Daraja STK Push backend still needs to be connected."
-    );
-
-}
-
-
-/* WHATSAPP ORDER */
-
-function sendWhatsApp(){
-
-    if(cart.length === 0){
-
-        alert("Your cart is empty!");
-
-        return;
-
-    }
-
-
-    const name =
-        document.getElementById("customerName").value.trim();
-
-    const phone =
-        document.getElementById("customerPhone").value.trim();
-
-    const location =
-        document.getElementById("deliveryLocation").value.trim();
-
-    const note =
-        document.getElementById("customerNote").value.trim();
-
-
-    if(!name || !phone || !location){
-
-        alert(
-        "Please enter your name, phone number and delivery location."
-        );
-
-        return;
-
-    }
-
-
-    let message =
-    "Hello SmartBiz! 👋%0A%0A" +
-
-    "*NEW ORDER*%0A%0A" +
-
-    "Name: " +
-    encodeURIComponent(name) +
-
-    "%0APhone: " +
-    encodeURIComponent(phone) +
-
-    "%0ALocation: " +
-    encodeURIComponent(location) +
-
-    "%0A%0A*Products:*%0A";
-
-
-    let total = 0;
-
-
-    cart.forEach(item=>{
-
-        const itemTotal =
-            item.price * item.quantity;
-
-        total += itemTotal;
-
-
-        message +=
-
-        encodeURIComponent(
-        item.name +
-        " x " +
-        item.quantity +
-        " = KSh " +
-        itemTotal.toLocaleString()
-        )
-
-        + "%0A";
-
-    });
-
-
-    message +=
-
-    "%0A*TOTAL: KSh " +
-    total.toLocaleString() +
-
-    "*%0A";
-
-
-    if(note){
-
-        message +=
-
-        "%0ANote: " +
-        encodeURIComponent(note);
-
-    }
-
-
-    const whatsappNumber =
-        "254758209823";
-
-
-    const whatsappURL =
-        "https://wa.me/" +
-        whatsappNumber +
-        "?text=" +
-        message;
-
-
-    window.open(
-        whatsappURL,
-        "_blank"
-    );
-
-}
-
-
-/* SEARCH */
-
-function searchProducts(){
-
-    const search =
-        document
-        .getElementById("searchInput")
-        .value
-        .toLowerCase();
-
-
-    const products =
-        document.querySelectorAll(".product");
-
-
-    products.forEach(product=>{
-
-        const text =
-            product.innerText.toLowerCase();
-
-
-        product.style.display =
-            text.includes(search)
-            ? "block"
-            : "none";
-
-    });
-
-}
-
-
-/* FILTER */
-
-function filterProducts(category,button){
-
-    const products =
-        document.querySelectorAll(".product");
-
-
-    document
-    .querySelectorAll(".categories button")
-    .forEach(btn=>{
-        btn.classList.remove("active");
-    });
-
-
-    button.classList.add("active");
-
-
-    products.forEach(product=>{
-
-        if(
-            category === "all" ||
-            product.dataset.category === category
-        ){
-
-            product.style.display = "block";
-
-        }else{
-
-            product.style.display = "none";
-
-        }
-
-    });
-
-}
-
-updateCart();
-
+$("#waBtn").onclick = () => {
+  if(!lines().length) return say("Add at least one product first.", true);
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(orderText())}`, "_blank");
+};
+function fixPhone(v){ v = v.replace(/\D/g,""); if(v.startsWith("0")) v = "254"+v.slice(1); if(v.startsWith("7")||v.startsWith("1")) v = "254"+v; return /^254[71]\d{8}$/.test(v) ? v : null; }
+$("#payBtn").onclick = async () => {
+  if(!lines().length) return say("Add at least one product first.", true);
+  const phone = fixPhone($("#phone").value);
+  if(!phone) return say("Enter a valid Safaricom number, like 0712 345 678.", true);
+  if(!MPESA_BACKEND) return say("M-PESA payment is not live yet. Please use Order on WhatsApp for now.", true);
+  say("Sending payment request to your phone…");
+  try{
+    const r = await fetch(MPESA_BACKEND, {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({phone, amount: total(), items: lines().map(l=>({name:l.p.name, qty:l.n})), name:$("#name").value, location:$("#loc").value})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || "Request failed");
+    say("Check your phone and enter your M-PESA PIN to finish.");
+  }catch(err){ say("Could not start payment: " + err.message + ". Try again or order on WhatsApp.", true); }
+};
+
+render(); paint();
 </script>
-
 </body>
 </html>
-```
