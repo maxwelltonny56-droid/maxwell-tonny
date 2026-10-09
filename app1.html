@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attachment Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<style>
+:root{--bg:#f3f7fb;--card:#fff;--ink:#14213d;--mute:#5b6b85;--line:#dbe4f0;--blue:#1f56c4;--blue-d:#173f94;--green:#17935f;--tint:#e8f0fd;--gtint:#e3f6ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1626;--card:#162136;--ink:#e8eefb;--mute:#9aabc7;--line:#26344f;--blue:#6b9bff;--blue-d:#9bbcff;--green:#3fcf8e;--tint:#1b2c52;--gtint:#12362a}}
+:root[data-theme="dark"]{--bg:#0e1626;--card:#162136;--ink:#e8eefb;--mute:#9aabc7;--line:#26344f;--blue:#6b9bff;--blue-d:#9bbcff;--green:#3fcf8e;--tint:#1b2c52;--gtint:#12362a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header{background:var(--card);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.2rem;letter-spacing:-.02em}
+.brand b{color:var(--blue)}.brand span{color:var(--green)}
+nav{display:flex;background:var(--tint);border-radius:999px;padding:4px}
+nav button{border:0;background:none;color:var(--blue-d);font:inherit;font-weight:700;padding:8px 16px;border-radius:999px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--blue);color:#fff}
+.who{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--mute)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.hero{padding:34px 0 18px}
+h1{font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.12;letter-spacing:-.03em;margin:0 0 8px;max-width:20ch}
+.sub{color:var(--mute);margin:0 0 20px;max-width:56ch}
+.search{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+.search input[type=search]{flex:1 1 260px;width:auto}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.btn{border:0;background:var(--blue);color:#fff;font:inherit;font-weight:700;padding:11px 20px;border-radius:10px;cursor:pointer}
+.btn:hover{background:var(--blue-d)}
+.btn.ghost{background:var(--tint);color:var(--blue-d)}
+.btn:disabled{opacity:.6;cursor:default}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:22px 0 10px;color:var(--mute);font-size:.92rem}
+.meta .acts{display:flex;gap:8px}
+.list{display:grid;gap:12px;padding-bottom:40px}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:16px}
+.card.intern{border-left-color:var(--green)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h3{margin:0;font-size:1.08rem}
+.org{color:var(--mute);font-size:.92rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ver{background:var(--gtint);color:var(--green);font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:999px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tag{background:var(--tint);color:var(--blue-d);font-size:.8rem;font-weight:500;padding:3px 10px;border-radius:999px}
+.tag.g{background:var(--gtint);color:var(--green)}
+.save{border:1.5px solid var(--line);background:none;color:var(--mute);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;font-size:.85rem;white-space:nowrap}
+.save[aria-pressed="true"]{border-color:var(--green);color:var(--green);font-weight:700}
+.more{display:none;border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:.95rem}
+.card.open .more{display:block}
+.appbox{display:none;border-top:1px dashed var(--line);margin-top:12px;padding-top:6px}
+.card.showapps .appbox{display:block}
+.app{padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.app:last-child{border-bottom:0}
+.app p{margin:6px 0}
+.st{width:auto;padding:6px 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.empty{text-align:center;padding:40px 16px;background:var(--card);border:1px dashed var(--line);border-radius:12px;color:var(--mute)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:26px 0 40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;font-weight:700;font-size:.9rem;margin-bottom:4px}
+.f{margin-bottom:12px}
+.hint{color:var(--mute);font-size:.82rem;font-weight:400}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:9}
+.pw{position:relative}.pw input{padding-right:46px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--mute);cursor:pointer;padding:6px;display:flex}
+.link{border:0;background:none;color:var(--blue);font:inherit;font-weight:700;cursor:pointer;padding:4px 0;margin-right:14px;text-decoration:underline}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:22px;width:min(520px,94vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(10,20,40,.55)}
+.x{position:absolute;right:10px;top:8px;border:0;background:none;color:var(--mute);font-size:1.6rem;line-height:1;cursor:pointer}
+.msg{font-weight:700;color:var(--blue-d);min-height:1.3em;margin:6px 0}
+.roles{display:flex;gap:18px}.roles label{font-weight:500;display:flex;gap:6px;align-items:center}.roles input{width:auto}
+#tsBox{margin:8px 0;min-height:65px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="Attachment Finder logo"><rect width="40" height="40" rx="10" fill="#1f56c4"/><circle cx="18" cy="19" r="9" fill="none" stroke="#fff" stroke-width="3"/><path d="M25 26l8 8" stroke="#3fcf8e" stroke-width="4" stroke-linecap="round"/><path d="M18 12l7 3.5-7 3.5-7-3.5z" fill="#3fcf8e"/><path d="M13.8 18v3c0 1.4 7.2 1.4 8.4 0v-3l-4.2 2z" fill="#fff"/></svg>
+    <div><b>Attachment</b> <span>Finder</span></div>
+  </div>
+  <nav role="tablist" aria-label="Choose your role">
+    <button role="tab" id="tabS" aria-selected="true">I'm a student</button>
+    <button role="tab" id="tabO" aria-selected="false">I'm an organization</button>
+  </nav>
+  <div class="who"><span id="hdrUser"></span><button class="save" id="hdrAuth" type="button">Log in</button></div>
+</div></header>
+
+<main class="wrap">
+<section id="student">
+  <div class="hero">
+    <h1>Find your attachment or internship in Kenya</h1>
+    <p class="sub">Search openings from organizations across all 47 counties. Filter by place, field and how you'll work.</p>
+    <div class="search">
+      <input type="search" id="q" placeholder="Search by role, organization or skill" aria-label="Search vacancies">
+      <button class="btn" id="go">Search</button>
+    </div>
+    <div class="filters">
+      <select id="fType" aria-label="Type"><option value="">Attachment &amp; internship</option><option>Attachment</option><option>Internship</option></select>
+      <select id="fCounty" aria-label="County"></select>
+      <select id="fField" aria-label="Field"></select>
+      <select id="fMode" aria-label="Work mode"><option value="">Any work mode</option><option>On-site</option><option>Hybrid</option><option>Remote</option></select>
+    </div>
+  </div>
+  <div class="meta"><span id="count"></span>
+    <span class="acts"><button class="save" id="myApps" type="button" hidden>My applications</button><button class="save" id="onlySaved" aria-pressed="false">Show saved only</button></span></div>
+  <div class="list" id="list"></div>
+  <div class="list" id="appsList" hidden></div>
+</section>
+
+<section id="org" hidden>
+  <div class="hero">
+    <h1>Post a vacancy and reach students nationwide</h1>
+    <p class="sub">Log in with an organization account, post your vacancy, and review the students who apply.</p>
+  </div>
+
+  <div class="panel" id="orgGate">
+    <p id="gateMsg"></p>
+    <button class="btn" id="gateBtn" type="button">Log in or create an organization account</button>
+  </div>
+
+  <div class="panel" id="postBox" hidden>
+    <form id="form">
+      <div class="grid">
+        <div class="f"><label for="oName">Organization name</label><input id="oName" required></div>
+        <div class="f"><label for="oTitle">Vacancy title</label><input id="oTitle" required placeholder="e.g. ICT attachment"></div>
+        <div class="f"><label for="oType">Type</label><select id="oType"><option>Attachment</option><option>Internship</option></select></div>
+        <div class="f"><label for="oField">Field</label><select id="oField"></select></div>
+        <div class="f"><label for="oCounty">County</label><select id="oCounty"></select></div>
+        <div class="f"><label for="oTown">Town or area</label><input id="oTown" placeholder="e.g. Westlands"></div>
+        <div class="f"><label for="oMode">Work mode</label><select id="oMode"><option>On-site</option><option>Hybrid</option><option>Remote</option></select></div>
+        <div class="f"><label for="oDur">Duration</label><input id="oDur" placeholder="e.g. 3 months"></div>
+        <div class="f"><label for="oDead">Application deadline</label><input id="oDead" type="date" required></div>
+        <div class="f"><label for="oContact">Contact email or phone</label><input id="oContact" required></div>
+      </div>
+      <div class="f"><label for="oReq">Requirements <span class="hint">(course, year of study, skills)</span></label><textarea id="oReq" rows="3" required></textarea></div>
+      <button class="btn" type="submit">Publish vacancy</button>
+    </form>
+  </div>
+
+  <div class="meta"><span>Your posted vacancies</span></div>
+  <div class="list" id="mine"></div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="authDlg">
+  <button class="x" data-close="authDlg" aria-label="Close" type="button">&times;</button>
+  <h2 id="authTitle" style="margin-top:0;padding-right:30px">Log in</h2>
+  <div class="f" id="roleRow" hidden><label>I am a</label>
+    <div class="roles"><label><input type="radio" name="role" value="student" checked> Student</label><label><input type="radio" name="role" value="organization"> Organization</label></div></div>
+  <div class="f" id="emailRow"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email"></div>
+  <div class="f" id="codeRow" hidden><label for="aCode">Code from your email</label><input id="aCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10"></div>
+  <div class="f" id="passRow"><label for="aPass" id="passLabel">Password</label>
+    <div class="pw"><input id="aPass" type="password" minlength="6" autocomplete="current-password"><button type="button" class="eye" data-eye="aPass" aria-label="Show password"></button></div></div>
+  <div class="f" id="confRow" hidden><label for="aConf">Confirm password</label>
+    <div class="pw"><input id="aConf" type="password" minlength="6" autocomplete="new-password"><button type="button" class="eye" data-eye="aConf" aria-label="Show password"></button></div></div>
+  <div id="tsBox"></div>
+  <p class="msg" id="authMsg" role="alert"></p>
+  <div class="row" style="margin-top:0"><button class="btn" id="authGo" type="button">Log in</button></div>
+  <p><button class="link" id="forgot" type="button">Forgot password?</button>
+     <button class="link" id="toSignup" type="button">New here? Create an account</button>
+     <button class="link" id="resend" type="button" hidden>Send a new code</button>
+     <button class="link" id="toLogin" type="button" hidden>Back to log in</button></p>
+</dialog>
+
+<dialog id="applyDlg">
+  <button class="x" data-close="applyDlg" aria-label="Close" type="button">&times;</button>
+  <h2 id="applyTitle" style="margin-top:0;padding-right:30px"></h2>
+  <form id="applyForm">
+    <div class="f"><label for="pName">Full name</label><input id="pName" required autocomplete="name"></div>
+    <div class="f"><label for="pPhone">Phone number</label><input id="pPhone" type="tel" required autocomplete="tel"></div>
+    <div class="f"><label for="pUni">University or college</label><input id="pUni" required></div>
+    <div class="f"><label for="pCourse">Course</label><input id="pCourse" required></div>
+    <div class="f"><label for="pYear">Year of study</label><select id="pYear"></select></div>
+    <div class="f"><label for="pNote">Short note <span class="hint">(why you fit this role)</span></label><textarea id="pNote" rows="3" maxlength="600"></textarea></div>
+    <div class="f"><label for="pCv">CV <span class="hint">(PDF or Word, up to 2 MB)</span></label><input id="pCv" type="file" accept=".pdf,.doc,.docx"></div>
+    <p class="hint">The organization will see these details and your CV.</p>
+    <p class="msg" role="alert"></p>
+    <button class="btn" id="applyGo" type="submit">Send application</button>
+  </form>
+</dialog>
+
+<script>
+const SUPABASE_URL="https://vcwixgjdovxskfacqtqp.supabase.co";
+const SUPABASE_KEY="sb_publishable_pENKCHWsK9ARFIiwizm2vg_ZndySxks";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+/* Paste your Cloudflare Turnstile SITE KEY (public) here. Never put the secret key in this file. */
+const TURNSTILE_SITE_KEY="0x4AAAAAAFSgntEVcrIXGn0h";
+
+const COUNTIES=["Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Machakos","Kajiado","Nyeri","Meru","Kakamega","Kilifi","Garissa","Embu","Kisii","Bungoma","Nyandarua","Laikipia","Turkana","Other county"];
+const FIELDS=["Engineering","ICT","Business & Finance","Education","Health & Nursing","Agriculture","Media & Communication","Law","Hospitality & Tourism","Other"];
+const YEARS=["Year 1","Year 2","Year 3","Year 4","Year 5","Graduate"];
+const $=s=>document.querySelector(s);
+const safe=(k,v)=>{try{if(v===undefined){return JSON.parse(localStorage.getItem(k))}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fd=s=>{const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})};
+let vacancies=[],myApps=[],orgApps=[],user=null,saved=new Set(safe("af_saved")||[]),onlySaved=false,showApps=false,recovering=false,pendingApply=null,applyingId=null,ctxRole="student",mode="login";
+const roleOf=()=>user&&user.user_metadata&&user.user_metadata.role==="student"?"student":"organization";
+
+/* ---------- Cloudflare Turnstile ---------- */
+let tsId=null;
+function ensureTs(){
+  if(!window.turnstile){setTimeout(ensureTs,250);return}
+  if(tsId===null)tsId=turnstile.render("#tsBox",{sitekey:TURNSTILE_SITE_KEY,theme:"auto"});
+  else turnstile.reset(tsId);
+}
+function capToken(){return tsId!==null?turnstile.getResponse(tsId):""}
+function capReset(){if(tsId!==null)turnstile.reset(tsId)}
+
+function opts(el,arr,first){el.innerHTML=(first?`<option value="">${first}</option>`:"")+arr.map(a=>`<option>${a}</option>`).join("")}
+opts($("#fCounty"),COUNTIES,"All counties");opts($("#fField"),FIELDS,"All fields");
+opts($("#oCounty"),COUNTIES);opts($("#oField"),FIELDS);opts($("#pYear"),YEARS);
+
+function toast(t){
+  const m=document.querySelector("dialog[open] .msg");
+  if(m){m.textContent=t;return}
+  const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600);
+}
+
+function appRow(a){
+  const o=["New","Shortlisted","Rejected"].map(s=>`<option${s===a.status?" selected":""}>${s}</option>`).join("");
+  return `<div class="app"><div><b>${esc(a.full_name)}</b></div><div class="hint">${esc([a.university,a.course,a.year].filter(Boolean).join(", "))}</div><div>${esc(a.phone)}, ${esc(a.email)}</div>${a.note?`<p>${esc(a.note)}</p>`:""}<div class="row">${a.cv_path?`<button class="btn ghost" data-cv="${esc(a.cv_path)}">View CV</button>`:""}<select class="st" data-status="${a.id}" aria-label="Status">${o}</select></div></div>`;
+}
+function myAppRow(a){
+  const v=vacancies.find(x=>x.id===a.vacancy_id)||{};
+  return `<article class="card"><div class="top"><div><h3>${esc(v.title||"Vacancy removed")}</h3><div class="org">${esc(v.org||"")}</div></div><span class="tag ${a.status==="Shortlisted"?"g":""}">${a.status}</span></div><p class="hint">Applied on ${fd(a.created_at)}</p></article>`;
+}
+
+function card(v,mine){
+  const list=mine?orgApps.filter(a=>a.vacancy_id===v.id):[];
+  const applied=myApps.some(a=>a.vacancy_id===v.id);
+  const btns=mine
+    ?`<button class="btn ghost" data-apps="1">Applicants (${list.length})</button><button class="btn ghost" data-del="${v.id}">Remove</button>`
+    :(applied?`<button class="btn ghost" disabled>Applied</button>`:`<button class="btn" data-apply="${v.id}">Apply</button>`);
+  const box=mine?`<div class="appbox">${list.length?list.map(appRow).join(""):'<p class="hint">No applications yet.</p>'}</div>`:"";
+  return `<article class="card ${v.type==="Internship"?"intern":""}">
+  <div class="top"><div><h3>${esc(v.title)}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}</div></div>
+  ${mine?"":`<button class="save" aria-pressed="${saved.has(v.id)}" data-save="${v.id}">${saved.has(v.id)?"Saved":"Save"}</button>`}</div>
+  <div class="tags"><span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
+  <div class="more"><p><b>Requirements:</b> ${esc(v.req)}</p><p><b>Apply by:</b> ${fd(v.dead)}<br><b>Contact:</b> ${esc(v.contact)}</p></div>
+  <div class="row"><button class="btn ghost" data-toggle="1">View details</button>${btns}</div>${box}</article>`;
+}
+
+function render(){
+  const q=$("#q").value.trim().toLowerCase(),t=$("#fType").value,c=$("#fCounty").value,f=$("#fField").value,m=$("#fMode").value;
+  const r=vacancies.filter(v=>(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
+  $("#count").textContent=r.length+(r.length===1?" vacancy found":" vacancies found");
+  $("#list").innerHTML=r.length?r.map(v=>card(v)).join(""):`<div class="empty"><b>No vacancies match yet.</b><br>Try another county or clear a filter.</div>`;
+  $("#appsList").innerHTML=myApps.length?myApps.map(myAppRow).join(""):`<div class="empty">You haven't applied yet. Find a vacancy and press Apply.</div>`;
+  $("#list").hidden=showApps;$("#appsList").hidden=!showApps;
+  $("#myApps").textContent=showApps?"Back to vacancies":"My applications";
+  const mine=user?vacancies.filter(v=>v.owner===user.id):[];
+  $("#mine").innerHTML=mine.length?mine.map(v=>card(v,true)).join(""):`<div class="empty">You haven't posted a vacancy yet.</div>`;
+}
+
+async function load(){
+  const {data,error}=await sb.from("vacancies").select("*").order("created_at",{ascending:false});
+  if(error){toast("Could not load vacancies. Check your connection.");console.error(error);return}
+  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements}));
+  render();
+}
+
+async function loadApps(){
+  if(!user){myApps=[];orgApps=[];render();return}
+  const {data,error}=await sb.from("applications").select("*").order("created_at",{ascending:false});
+  if(error){console.error(error);myApps=[];orgApps=[]}
+  else{myApps=data.filter(a=>a.applicant===user.id);orgApps=data.filter(a=>a.applicant!==user.id)}
+  render();
+}
+
+async function refreshUser(){
+  const {data}=await sb.auth.getSession();
+  user=data.session?data.session.user:null;
+  if(!user)showApps=false;
+  $("#hdrUser").textContent=user?user.email:"";
+  $("#hdrAuth").textContent=user?"Log out":"Log in";
+  if(user&&!recovering&&$("#authDlg").open)$("#authDlg").close();
+  const org=!!user&&roleOf()==="organization";
+  $("#postBox").hidden=!org;$("#orgGate").hidden=org;
+  $("#gateMsg").textContent=!user?"Log in or create an organization account to post vacancies and review applicants.":"You're signed in with a student account. Log out, then use an organization account to post vacancies.";
+  $("#gateBtn").hidden=!!user;
+  $("#myApps").hidden=!(user&&roleOf()==="student");
+  await loadApps();
+  if(user&&pendingApply&&roleOf()==="student"){const id=pendingApply;pendingApply=null;openApply(id)}
+}
+
+function openAuth(m,r){
+  ctxRole=r||"student";setMode(m);$("#authMsg").textContent="";
+  if(!$("#authDlg").open){$("#authDlg").showModal();ensureTs()}
+}
+function openApply(id){
+  const v=vacancies.find(x=>x.id===id);if(!v)return;
+  applyingId=id;$("#applyTitle").textContent="Apply: "+v.title+", "+v.org;
+  $("#applyDlg").querySelector(".msg").textContent="";
+  if(!$("#applyDlg").open)$("#applyDlg").showModal();
+}
+
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const card=b.closest(".card");
+  if(b.dataset.close){$("#"+b.dataset.close).close()}
+  if(b.dataset.toggle){card.classList.toggle("open");b.textContent=card.classList.contains("open")?"Hide details":"View details"}
+  if(b.dataset.apps){card.classList.toggle("showapps")}
+  if(b.dataset.save){const id=b.dataset.save;saved.has(id)?saved.delete(id):saved.add(id);safe("af_saved",[...saved]);render()}
+  if(b.dataset.apply){
+    const id=b.dataset.apply;
+    if(!user){pendingApply=id;return openAuth("signup","student")}
+    if(roleOf()!=="student")return toast("Use a student account to apply");
+    openApply(id);
+  }
+  if(b.dataset.cv){
+    const w=window.open("about:blank","_blank");
+    const {data,error}=await sb.storage.from("cvs").createSignedUrl(b.dataset.cv,300);
+    if(error){if(w)w.close();return toast(error.message)}
+    if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,"_blank");
+  }
+  if(b.dataset.del){
+    if(!confirm("Remove this vacancy and its applications?"))return;
+    const {error}=await sb.from("vacancies").delete().eq("id",b.dataset.del);
+    if(error)toast(error.message);else{toast("Vacancy removed");load();loadApps()}
+  }
+});
+document.addEventListener("change",async e=>{
+  const s=e.target.closest("[data-status]");if(!s)return;
+  const {error}=await sb.from("applications").update({status:s.value}).eq("id",s.dataset.status);
+  if(error)return toast(error.message);
+  const a=orgApps.find(x=>x.id===s.dataset.status);if(a)a.status=s.value;
+  toast("Status updated");
+});
+
+["q","fType","fCounty","fField","fMode"].forEach(id=>$("#"+id).addEventListener("input",render));
+$("#go").onclick=render;
+$("#onlySaved").onclick=function(){onlySaved=!onlySaved;this.setAttribute("aria-pressed",onlySaved);render()};
+$("#myApps").onclick=()=>{showApps=!showApps;render()};
+function show(role){const s=role==="s";$("#student").hidden=!s;$("#org").hidden=s;$("#tabS").setAttribute("aria-selected",s);$("#tabO").setAttribute("aria-selected",!s);window.scrollTo(0,0)}
+$("#tabS").onclick=()=>show("s");$("#tabO").onclick=()=>show("o");
+$("#hdrAuth").onclick=()=>user?sb.auth.signOut():openAuth("login","student");
+$("#gateBtn").onclick=()=>openAuth("login","organization");
+$("#authDlg").addEventListener("close",()=>{if(!user)pendingApply=null});
+
+/* ---------- Password eye icon ---------- */
+const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+document.querySelectorAll("[data-eye]").forEach(b=>b.innerHTML=EYE);
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-eye]");if(!b)return;
+  const i=$("#"+b.dataset.eye),showing=i.type==="password";
+  i.type=showing?"text":"password";b.innerHTML=showing?EYE_OFF:EYE;
+  b.setAttribute("aria-label",showing?"Hide password":"Show password");
+});
+
+/* ---------- Login, sign up, and password reset with an emailed code ---------- */
+function setMode(m){
+  mode=m;
+  $("#authTitle").textContent={login:"Log in",signup:"Create an account",forgot:"Reset your password",code:"Enter the code we emailed you"}[m];
+  $("#authGo").textContent={login:"Log in",signup:"Create account",forgot:"Send code",code:"Reset password"}[m];
+  $("#passLabel").textContent=(m==="code")?"New password":"Password";
+  $("#roleRow").hidden=(m!=="signup");
+  if(m==="signup")document.querySelector(`input[name=role][value=${ctxRole}]`).checked=true;
+  $("#codeRow").hidden=(m!=="code");
+  $("#passRow").hidden=(m==="forgot");
+  $("#confRow").hidden=!(m==="signup"||m==="code");
+  $("#forgot").hidden=(m!=="login");
+  $("#toSignup").hidden=(m!=="login");
+  $("#resend").hidden=(m!=="code");
+  $("#toLogin").hidden=(m==="login");
+  $("#authMsg").textContent="";
+}
+$("#forgot").onclick=()=>setMode("forgot");
+$("#toSignup").onclick=()=>setMode("signup");
+$("#toLogin").onclick=()=>setMode("login");
+$("#resend").onclick=async()=>{
+  const email=$("#aEmail").value.trim();
+  if(!email)return toast("Enter your email first");
+  const captchaToken=capToken();
+  if(!captchaToken)return toast("Please complete the captcha first");
+  const {error}=await sb.auth.resetPasswordForEmail(email,{captchaToken});
+  capReset();
+  toast(error?error.message:"New code sent");
+};
+["aEmail","aCode","aPass","aConf"].forEach(id=>$("#"+id).addEventListener("keydown",e=>{if(e.key==="Enter")$("#authGo").click()}));
+
+$("#authGo").onclick=async()=>{
+  const email=$("#aEmail").value.trim(),pass=$("#aPass").value,conf=$("#aConf").value,code=$("#aCode").value.trim();
+  if(mode==="login"){
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
+    const {error}=await sb.auth.signInWithPassword({email,password:pass,options:{captchaToken}});
+    capReset();
+    if(error)toast(error.message);
+  }else if(mode==="signup"){
+    if(!email)return toast("Enter your email");
+    if(pass.length<6)return toast("Password must be at least 6 characters");
+    if(pass!==conf)return toast("Passwords do not match");
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
+    const role=document.querySelector("input[name=role]:checked").value;
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{role},captchaToken}});
+    capReset();
+    if(error)return toast(error.message);
+    toast(data.session?"Account created":"Check your email to confirm, then log in");
+  }else if(mode==="forgot"){
+    if(!email)return toast("Enter your email first");
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
+    const {error}=await sb.auth.resetPasswordForEmail(email,{captchaToken});
+    capReset();
+    if(error)return toast(error.message);
+    setMode("code");toast("Code sent. Check your email");
+  }else if(mode==="code"){
+    if(!email||!code)return toast("Enter your email and the code");
+    if(pass.length<6)return toast("Password must be at least 6 characters");
+    if(pass!==conf)return toast("Passwords do not match");
+    recovering=true;
+    const {error:e1}=await sb.auth.verifyOtp({email,token:code,type:"recovery"});
+    if(e1){recovering=false;return toast(e1.message)}
+    const {error:e2}=await sb.auth.updateUser({password:pass});
+    if(e2)return toast(e2.message);
+    recovering=false;
+    ["aPass","aConf","aCode"].forEach(id=>$("#"+id).value="");
+    setMode("login");await refreshUser();toast("Password updated");
+  }
+};
+sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));
+
+/* ---------- Post a vacancy ---------- */
+$("#form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const row={org:$("#oName").value.trim(),title:$("#oTitle").value.trim(),type:$("#oType").value,field:$("#oField").value,county:$("#oCounty").value,town:$("#oTown").value.trim(),mode:$("#oMode").value,duration:$("#oDur").value.trim(),deadline:$("#oDead").value,contact:$("#oContact").value.trim(),requirements:$("#oReq").value.trim()};
+  const {error}=await sb.from("vacancies").insert(row);
+  if(error)return toast(error.message);
+  e.target.reset();toast("Vacancy published");load();
+});
+
+/* ---------- Apply for a vacancy ---------- */
+$("#applyForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=$("#applyGo");btn.disabled=true;
+  try{
+    let cv_path=null;const file=$("#pCv").files[0];
+    if(file){
+      if(file.size>2*1024*1024)return toast("The CV must be under 2 MB");
+      const ext=(file.name.split(".").pop()||"pdf").toLowerCase().replace(/[^a-z0-9]/g,"");
+      cv_path=`${user.id}/${Date.now()}.${ext}`;
+      const {error}=await sb.storage.from("cvs").upload(cv_path,file);
+      if(error)return toast(error.message);
+    }
+    const row={vacancy_id:applyingId,full_name:$("#pName").value.trim(),email:user.email,phone:$("#pPhone").value.trim(),university:$("#pUni").value.trim(),course:$("#pCourse").value.trim(),year:$("#pYear").value,note:$("#pNote").value.trim(),cv_path};
+    const {error}=await sb.from("applications").insert(row);
+    if(error)return toast(error.code==="23505"?"You already applied to this vacancy":error.message);
+    $("#applyDlg").close();e.target.reset();
+    await loadApps();toast("Application sent");
+  }finally{btn.disabled=false}
+});
+
+load();refreshUser();
+</script>
+</body>
+</html>
