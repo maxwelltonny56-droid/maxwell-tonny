@@ -6,6 +6,7 @@
 <title>Attachment Finder</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <style>
 :root{--bg:#f3f7fb;--card:#fff;--ink:#14213d;--mute:#5b6b85;--line:#dbe4f0;--blue:#1f56c4;--blue-d:#173f94;--green:#17935f;--tint:#e8f0fd;--gtint:#e3f6ec;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -73,6 +74,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
 .x{position:absolute;right:10px;top:8px;border:0;background:none;color:var(--mute);font-size:1.6rem;line-height:1;cursor:pointer}
 .msg{font-weight:700;color:var(--blue-d);min-height:1.3em;margin:6px 0}
 .roles{display:flex;gap:18px}.roles label{font-weight:500;display:flex;gap:6px;align-items:center}.roles input{width:auto}
+#tsBox{margin:8px 0;min-height:65px}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -158,6 +160,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
     <div class="pw"><input id="aPass" type="password" minlength="6" autocomplete="current-password"><button type="button" class="eye" data-eye="aPass" aria-label="Show password"></button></div></div>
   <div class="f" id="confRow" hidden><label for="aConf">Confirm password</label>
     <div class="pw"><input id="aConf" type="password" minlength="6" autocomplete="new-password"><button type="button" class="eye" data-eye="aConf" aria-label="Show password"></button></div></div>
+  <div id="tsBox"></div>
   <p class="msg" id="authMsg" role="alert"></p>
   <div class="row" style="margin-top:0"><button class="btn" id="authGo" type="button">Log in</button></div>
   <p><button class="link" id="forgot" type="button">Forgot password?</button>
@@ -188,6 +191,9 @@ const SUPABASE_URL="https://vcwixgjdovxskfacqtqp.supabase.co";
 const SUPABASE_KEY="sb_publishable_pENKCHWsK9ARFIiwizm2vg_ZndySxks";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+/* Paste your Cloudflare Turnstile SITE KEY (public) here. Never put the secret key in this file. */
+const TURNSTILE_SITE_KEY="0x4AAAAAAFSgntEVcrIXGn0h";
+
 const COUNTIES=["Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Machakos","Kajiado","Nyeri","Meru","Kakamega","Kilifi","Garissa","Embu","Kisii","Bungoma","Nyandarua","Laikipia","Turkana","Other county"];
 const FIELDS=["Engineering","ICT","Business & Finance","Education","Health & Nursing","Agriculture","Media & Communication","Law","Hospitality & Tourism","Other"];
 const YEARS=["Year 1","Year 2","Year 3","Year 4","Year 5","Graduate"];
@@ -197,6 +203,16 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const fd=s=>{const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})};
 let vacancies=[],myApps=[],orgApps=[],user=null,saved=new Set(safe("af_saved")||[]),onlySaved=false,showApps=false,recovering=false,pendingApply=null,applyingId=null,ctxRole="student",mode="login";
 const roleOf=()=>user&&user.user_metadata&&user.user_metadata.role==="student"?"student":"organization";
+
+/* ---------- Cloudflare Turnstile ---------- */
+let tsId=null;
+function ensureTs(){
+  if(!window.turnstile){setTimeout(ensureTs,250);return}
+  if(tsId===null)tsId=turnstile.render("#tsBox",{sitekey:TURNSTILE_SITE_KEY,theme:"auto"});
+  else turnstile.reset(tsId);
+}
+function capToken(){return tsId!==null?turnstile.getResponse(tsId):""}
+function capReset(){if(tsId!==null)turnstile.reset(tsId)}
 
 function opts(el,arr,first){el.innerHTML=(first?`<option value="">${first}</option>`:"")+arr.map(a=>`<option>${a}</option>`).join("")}
 opts($("#fCounty"),COUNTIES,"All counties");opts($("#fField"),FIELDS,"All fields");
@@ -275,7 +291,10 @@ async function refreshUser(){
   if(user&&pendingApply&&roleOf()==="student"){const id=pendingApply;pendingApply=null;openApply(id)}
 }
 
-function openAuth(m,r){ctxRole=r||"student";setMode(m);$("#authMsg").textContent="";if(!$("#authDlg").open)$("#authDlg").showModal()}
+function openAuth(m,r){
+  ctxRole=r||"student";setMode(m);$("#authMsg").textContent="";
+  if(!$("#authDlg").open){$("#authDlg").showModal();ensureTs()}
+}
 function openApply(id){
   const v=vacancies.find(x=>x.id===id);if(!v)return;
   applyingId=id;$("#applyTitle").textContent="Apply: "+v.title+", "+v.org;
@@ -360,7 +379,10 @@ $("#toLogin").onclick=()=>setMode("login");
 $("#resend").onclick=async()=>{
   const email=$("#aEmail").value.trim();
   if(!email)return toast("Enter your email first");
-  const {error}=await sb.auth.resetPasswordForEmail(email);
+  const captchaToken=capToken();
+  if(!captchaToken)return toast("Please complete the captcha first");
+  const {error}=await sb.auth.resetPasswordForEmail(email,{captchaToken});
+  capReset();
   toast(error?error.message:"New code sent");
 };
 ["aEmail","aCode","aPass","aConf"].forEach(id=>$("#"+id).addEventListener("keydown",e=>{if(e.key==="Enter")$("#authGo").click()}));
@@ -368,19 +390,28 @@ $("#resend").onclick=async()=>{
 $("#authGo").onclick=async()=>{
   const email=$("#aEmail").value.trim(),pass=$("#aPass").value,conf=$("#aConf").value,code=$("#aCode").value.trim();
   if(mode==="login"){
-    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
+    const {error}=await sb.auth.signInWithPassword({email,password:pass,options:{captchaToken}});
+    capReset();
     if(error)toast(error.message);
   }else if(mode==="signup"){
     if(!email)return toast("Enter your email");
     if(pass.length<6)return toast("Password must be at least 6 characters");
     if(pass!==conf)return toast("Passwords do not match");
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
     const role=document.querySelector("input[name=role]:checked").value;
-    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{role}}});
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{role},captchaToken}});
+    capReset();
     if(error)return toast(error.message);
     toast(data.session?"Account created":"Check your email to confirm, then log in");
   }else if(mode==="forgot"){
     if(!email)return toast("Enter your email first");
-    const {error}=await sb.auth.resetPasswordForEmail(email);
+    const captchaToken=capToken();
+    if(!captchaToken)return toast("Please complete the captcha first");
+    const {error}=await sb.auth.resetPasswordForEmail(email,{captchaToken});
+    capReset();
     if(error)return toast(error.message);
     setMode("code");toast("Code sent. Check your email");
   }else if(mode==="code"){
