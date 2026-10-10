@@ -163,6 +163,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
   <div id="tsBox"></div>
   <p class="msg" id="authMsg" role="alert"></p>
   <div class="row" style="margin-top:0"><button class="btn" id="authGo" type="button">Log in</button></div>
+  <div class="row" style="margin-top:8px"><button class="btn ghost" id="googleBtn" type="button">Continue with Google</button></div>
   <p><button class="link" id="forgot" type="button">Forgot password?</button>
      <button class="link" id="toSignup" type="button">New here? Create an account</button>
      <button class="link" id="resend" type="button" hidden>Send a new code</button>
@@ -278,6 +279,11 @@ async function loadApps(){
 async function refreshUser(){
   const {data}=await sb.auth.getSession();
   user=data.session?data.session.user:null;
+  /* Google sign-in users have no role yet: save the role chosen before the redirect */
+  if(user&&!(user.user_metadata&&user.user_metadata.role)){
+    const {data:u}=await sb.auth.updateUser({data:{role:safe("af_oauth_role")||"student"}});
+    if(u&&u.user)user=u.user;
+  }
   if(!user)showApps=false;
   $("#hdrUser").textContent=user?user.email:"";
   $("#hdrAuth").textContent=user?"Log out":"Log in";
@@ -371,6 +377,7 @@ function setMode(m){
   $("#toSignup").hidden=(m!=="login");
   $("#resend").hidden=(m!=="code");
   $("#toLogin").hidden=(m==="login");
+  $("#googleBtn").hidden=(m==="forgot"||m==="code");
   $("#authMsg").textContent="";
 }
 $("#forgot").onclick=()=>setMode("forgot");
@@ -428,6 +435,15 @@ $("#authGo").onclick=async()=>{
     setMode("login");await refreshUser();toast("Password updated");
   }
 };
+
+/* ---------- Continue with Google ---------- */
+$("#googleBtn").onclick=async()=>{
+  const role=(mode==="signup")?document.querySelector("input[name=role]:checked").value:ctxRole;
+  safe("af_oauth_role",role);
+  const {error}=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+  if(error)toast(error.message);
+};
+
 sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));
 
 /* ---------- Post a vacancy ---------- */
