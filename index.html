@@ -41,6 +41,11 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--card);borde
 .list{display:grid;gap:12px;padding-bottom:40px}
 .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:16px}
 .card.intern{border-left-color:var(--green)}
+.card.featured{border-color:#e0a800;border-left-color:#e0a800;box-shadow:0 0 0 1px rgba(224,168,0,.25)}
+.feat{background:rgba(224,168,0,.2);color:#a87400;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:4px}
+.prem{background:var(--tint);color:var(--blue-d);font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:999px}
+.plan{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.plan h3{margin:0 0 4px;font-size:1.05rem}
 .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .card h3{margin:0;font-size:1.08rem}
 .org{color:var(--mute);font-size:.92rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -124,6 +129,13 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
     <button class="btn" id="gateBtn" type="button">Log in or create an organization account</button>
   </div>
 
+  <div class="panel" id="premBox" hidden>
+    <div class="plan">
+      <div><h3 id="premTitle"></h3><p class="hint" id="premText" style="margin:0"></p></div>
+      <button class="btn" id="premBtn" type="button"></button>
+    </div>
+  </div>
+
   <div class="panel" id="postBox" hidden>
     <form id="form">
       <div class="grid">
@@ -187,6 +199,15 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
   </form>
 </dialog>
 
+<dialog id="premDlg">
+  <button class="x" data-close="premDlg" aria-label="Close" type="button">&times;</button>
+  <h2 style="margin-top:0;padding-right:30px">Go Premium</h2>
+  <p>KES 1,000 for 30 days. Your vacancies appear first with a Featured tag and a Premium badge. Paying again before it ends adds 30 more days.</p>
+  <div class="f"><label for="premPhone">M-PESA phone number</label><input id="premPhone" type="tel" inputmode="tel" placeholder="07XXXXXXXX" autocomplete="tel"></div>
+  <p class="msg" role="alert"></p>
+  <button class="btn" id="premPay" type="button">Pay KES 1,000 with M-PESA</button>
+</dialog>
+
 <script>
 const SUPABASE_URL="https://vcwixgjdovxskfacqtqp.supabase.co";
 const SUPABASE_KEY="sb_publishable_pENKCHWsK9ARFIiwizm2vg_ZndySxks";
@@ -203,6 +224,7 @@ const safe=(k,v)=>{try{if(v===undefined){return JSON.parse(localStorage.getItem(
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fd=s=>{const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})};
 let vacancies=[],myApps=[],orgApps=[],user=null,saved=new Set(safe("af_saved")||[]),onlySaved=false,showApps=false,recovering=false,pendingApply=null,applyingId=null,ctxRole="student",mode="login";
+let premMap=new Map();
 const roleOf=()=>user&&user.user_metadata&&user.user_metadata.role==="student"?"student":"organization";
 
 /* ---------- Cloudflare Turnstile ---------- */
@@ -241,8 +263,8 @@ function card(v,mine){
     ?`<button class="btn ghost" data-apps="1">Applicants (${list.length})</button><button class="btn ghost" data-del="${v.id}">Remove</button>`
     :(applied?`<button class="btn ghost" disabled>Applied</button>`:`<button class="btn" data-apply="${v.id}">Apply</button>`);
   const box=mine?`<div class="appbox">${list.length?list.map(appRow).join(""):'<p class="hint">No applications yet.</p>'}</div>`:"";
-  return `<article class="card ${v.type==="Internship"?"intern":""}">
-  <div class="top"><div><h3>${esc(v.title)}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}</div></div>
+  return `<article class="card ${v.type==="Internship"?"intern":""}${v.prem?" featured":""}">
+  <div class="top"><div><h3>${esc(v.title)}${v.prem?' <span class="feat">Featured</span>':""}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}${v.prem?' <span class="prem">Premium</span>':""}</div></div>
   ${mine?"":`<button class="save" aria-pressed="${saved.has(v.id)}" data-save="${v.id}">${saved.has(v.id)?"Saved":"Save"}</button>`}</div>
   <div class="tags"><span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
   <div class="more"><p><b>Requirements:</b> ${esc(v.req)}</p><p><b>Apply by:</b> ${fd(v.dead)}<br><b>Contact:</b> ${esc(v.contact)}</p></div>
@@ -250,6 +272,7 @@ function card(v,mine){
 }
 
 function render(){
+  renderPrem();
   const q=$("#q").value.trim().toLowerCase(),t=$("#fType").value,c=$("#fCounty").value,f=$("#fField").value,m=$("#fMode").value;
   const r=vacancies.filter(v=>(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
   $("#count").textContent=r.length+(r.length===1?" vacancy found":" vacancies found");
@@ -262,9 +285,11 @@ function render(){
 }
 
 async function load(){
-  const {data,error}=await sb.from("vacancies").select("*").order("created_at",{ascending:false});
+  const [{data,error},pr]=await Promise.all([sb.from("vacancies").select("*").order("created_at",{ascending:false}),sb.from("org_premium").select("org_id,premium_until")]);
   if(error){toast("Could not load vacancies. Check your connection.");console.error(error);return}
-  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements}));
+  premMap=new Map(((pr&&pr.data)||[]).map(p=>[p.org_id,p.premium_until]));
+  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements,prem:premMap.has(r.owner)}));
+  vacancies.sort((a,b)=>b.prem-a.prem);
   render();
 }
 
@@ -475,6 +500,47 @@ $("#applyForm").addEventListener("submit",async e=>{
     await loadApps();toast("Application sent");
   }finally{btn.disabled=false}
 });
+
+/* ---------- Premium for organizations ---------- */
+const BACKEND="https://smartbiz-backend-iz1h.onrender.com";
+function myPremUntil(){const d=user&&premMap.get(user.id);return d?new Date(d):null}
+function renderPrem(){
+  const org=!!user&&roleOf()==="organization";
+  $("#premBox").hidden=!org;
+  if(!org)return;
+  const until=myPremUntil();
+  $("#premTitle").textContent=until?"Premium is active":"Free plan";
+  $("#premText").textContent=until?"Your vacancies appear first. Active until "+fd(until)+".":"Go Premium for KES 1,000 per 30 days. Your vacancies appear first with a Featured tag and a Premium badge.";
+  $("#premBtn").textContent=until?"Renew premium":"Go Premium";
+}
+$("#premBtn").onclick=()=>{$("#premDlg .msg").textContent="";$("#premDlg").showModal()};
+$("#premPay").onclick=async()=>{
+  const phone=$("#premPhone").value.trim();
+  if(!phone)return toast("Enter your M-PESA phone number");
+  const btn=$("#premPay");btn.disabled=true;
+  try{
+    const {data}=await sb.auth.getSession();
+    const token=data.session&&data.session.access_token;
+    if(!token)return toast("Please log in again");
+    toast("Sending the payment request. This can take up to a minute.");
+    const r=await fetch(BACKEND+"/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({phone})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)return toast(j.error||"Could not start the payment. Try again.");
+    toast(j.message||"Check your phone and enter your M-PESA PIN.");
+    waitForPremium();
+  }catch(e){console.error(e);toast("Could not reach the server. Try again in a minute.")}
+  finally{btn.disabled=false}
+};
+async function waitForPremium(){
+  const before=myPremUntil();
+  for(let i=0;i<24;i++){
+    await new Promise(r=>setTimeout(r,5000));
+    await load();
+    const now=myPremUntil();
+    if(now&&(!before||now>before)){$("#premDlg").close();toast("Premium is active. Your vacancies now appear first.");return}
+  }
+  toast("We have not received the payment yet. Refresh the page in a minute to check.");
+}
 
 load();refreshUser();
 </script>
