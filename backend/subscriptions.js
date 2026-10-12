@@ -1,5 +1,10 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
+const E = process.env;
+E.DARAJA_CONSUMER_KEY ||= E.CONSUMER_KEY;
+E.DARAJA_CONSUMER_SECRET ||= E.CONSUMER_SECRET;
+E.DARAJA_SHORTCODE ||= E.SHORTCODE;
+E.DARAJA_PASSKEY ||= E.PASSKEY;
 
 const router = express.Router();
 const supabase = createClient(
