@@ -33,6 +33,7 @@ const orders = new Map();
 
 const app = express();
 app.use(express.json({ limit: "20kb" }));
+   app.use('/api/subscribe', require('./subscriptions'));
 app.use("/pay", cors({ origin: ALLOWED_ORIGIN }));
 app.use("/status", cors({ origin: ALLOWED_ORIGIN }));
 
