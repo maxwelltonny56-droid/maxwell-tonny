@@ -1,0 +1,515 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bites | Food Ordering</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #fffaf2;
+            color: #292929;
+        }
+
+        header {
+            background: #18251c;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            color: #ffc247;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+        }
+
+        nav a:hover {
+            color: #ffc247;
+        }
+
+        .hero {
+            min-height: 350px;
+            padding: 70px 7%;
+            background: linear-gradient(90deg,
+                rgba(0,0,0,.85), rgba(0,0,0,.25)),
+                url("https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=80")
+                center/cover;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .hero h2 {
+            font-size: clamp(32px, 5vw, 52px);
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #ffc247;
+            color: #18251c;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #f1a900;
+        }
+
+        section {
+            padding: 50px 7%;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(220px, 1fr)
+            );
+            gap: 25px;
+        }
+
+        .food-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px #00000012;
+            transition: transform .2s;
+        }
+
+        .food-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .food-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .food-info {
+            padding: 18px;
+        }
+
+        .food-info h3 {
+            margin-bottom: 10px;
+        }
+
+        .food-info p {
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            display: block;
+            color: #b77900;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .cart-box, .order-box {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #00000010;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item button {
+            padding: 4px 9px;
+            cursor: pointer;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        footer {
+            background: #18251c;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        footer p {
+            margin: 6px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                justify-content: center;
+                text-align: center;
+            }
+
+            nav a {
+                margin: 6px;
+                display: inline-block;
+            }
+
+            .hero {
+                padding: 50px 6%;
+            }
+
+            section {
+                padding: 35px 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🍔 Golden Bites</h1>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#menu">Menu</a>
+        <a href="#cart">Cart (<span id="cart-count">0</span>)</a>
+        <a href="#contact">Contact</a>
+    </nav>
+</header>
+
+<section class="hero" id="home">
+    <h2>Delicious Food, Happy Moments!</h2>
+    <p>Your favourite meals, freshly prepared and ready to enjoy.</p>
+    <a href="#menu" class="btn">Order Food Now</a>
+</section>
+
+<section id="menu">
+    <h2 class="section-title">Our Food Menu 🍕</h2>
+
+    <div class="menu" id="food-menu"></div>
+</section>
+
+<section id="cart">
+    <h2 class="section-title">🛒 Your Shopping Cart</h2>
+
+    <div class="cart-box">
+        <div id="cart-items">
+            Your cart is empty. Add something delicious!
+        </div>
+
+        <div class="total">
+            Total: KSh <span id="total">0</span>
+        </div>
+
+        <button class="btn" onclick="goToCheckout()">
+            Proceed to Order
+        </button>
+    </div>
+</section>
+
+<section id="checkout">
+    <h2 class="section-title">Complete Your Order</h2>
+
+    <div class="order-box">
+        <form id="order-form">
+            <label for="customer">Full Name</label>
+            <input id="customer" type="text"
+                   placeholder="Enter your name" required>
+
+            <label for="phone">Phone Number</label>
+            <input id="phone" type="tel"
+                   placeholder="e.g. 0712345678" required>
+
+            <label for="address">Delivery Location</label>
+            <textarea id="address" rows="3"
+                      placeholder="Enter your delivery location"
+                      required></textarea>
+
+            <label for="payment">Payment Method</label>
+            <select id="payment" required>
+                <option value="">Choose payment method</option>
+                <option value="M-Pesa on delivery">M-Pesa on delivery</option>
+                <option value="Cash on delivery">Cash on delivery</option>
+            </select>
+
+            <button type="submit" class="btn">
+                Place Order
+            </button>
+        </form>
+
+        <p id="order-message" style="margin-top:18px;"></p>
+    </div>
+</section>
+
+<section id="contact">
+    <h2 class="section-title">Contact Us 📞 0758209823</h2>
+    <div style="text-align:center; line-height:2;">
+        <p>Welcome to Golden Bites!</p>
+        <p>📍 Location: Thika-opposite main stage, Kiambu County, Kenya</p>
+        <p>🍽️ Fresh food, friendly service.</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 Golden Bites</p>
+    <p>Made with ❤️ for food lovers.</p>
+</footer>
+
+<script>
+    const foods = [
+        {
+            id: 1,
+            name: "Beef Burger",
+            price: 350,
+            description: "Juicy burger with fresh vegetables.",
+            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+            id: 2,
+            name: "Pizza",
+            price: 800,
+            description: "Tasty pizza loaded with toppings.",
+            image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+            id: 3,
+            name: "French Fries",
+            price: 200,
+            description: "Crispy golden fries.",
+            image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+            id: 4,
+            name: "Chicken",
+            price: 450,
+            description: "Deliciously seasoned chicken.",
+            image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+            id: 5,
+            name: "Pancakes",
+            price: 250,
+            description: "Soft pancakes for a sweet treat.",
+            image: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+            id: 6,
+            name: "Fresh Juice",
+            price: 150,
+            description: "Refreshing fruit juice.",
+            image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80"
+        }
+    ];
+
+    let cart = [];
+
+    const menu = document.getElementById("food-menu");
+
+    foods.forEach(food => {
+        menu.innerHTML += `
+            <div class="food-card">
+                <img src="${food.image}" alt="${food.name}"
+                     loading="lazy">
+                <div class="food-info">
+                    <h3>${food.name}</h3>
+                    <p>${food.description}</p>
+                    <span class="price">
+                        KSh ${food.price.toLocaleString()}
+                    </span>
+                    <button class="btn"
+                        onclick="addToCart(${food.id})">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    function addToCart(id) {
+        const food = foods.find(item => item.id === id);
+        const existing = cart.find(item => item.id === id);
+
+        if (existing) {
+            existing.quantity++;
+        } else {
+            cart.push({ ...food, quantity: 1 });
+        }
+
+        renderCart();
+    }
+
+    function changeQuantity(id, amount) {
+        const item = cart.find(item => item.id === id);
+
+        if (!item) return;
+
+        item.quantity += amount;
+
+        if (item.quantity <= 0) {
+            cart = cart.filter(item => item.id !== id);
+        }
+
+        renderCart();
+    }
+
+    function removeItem(id) {
+        cart = cart.filter(item => item.id !== id);
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById("cart-items");
+        const count = cart.reduce(
+            (sum, item) => sum + item.quantity, 0
+        );
+
+        const total = cart.reduce(
+            (sum, item) => sum + item.price * item.quantity, 0
+        );
+
+        document.getElementById("cart-count").textContent = count;
+        document.getElementById("total").textContent =
+            total.toLocaleString();
+
+        if (cart.length === 0) {
+            container.textContent =
+                "Your cart is empty. Add something delicious!";
+            return;
+        }
+
+        container.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <div>
+                    <strong>${item.name}</strong><br>
+                    KSh ${(item.price * item.quantity).toLocaleString()}
+                </div>
+                <div>
+                    <button onclick="changeQuantity(${item.id}, -1)"
+                            aria-label="Decrease ${item.name}">−</button>
+                    ${item.quantity}
+                    <button onclick="changeQuantity(${item.id}, 1)"
+                            aria-label="Increase ${item.name}">+</button>
+                    <button onclick="removeItem(${item.id})">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function goToCheckout() {
+        if (cart.length === 0) {
+            alert("Please add food to your cart first!");
+            return;
+        }
+
+        document.getElementById("checkout").scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+
+    document.getElementById("order-form").addEventListener(
+        "submit", function(event) {
+            event.preventDefault();
+
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+
+            const name = document.getElementById("customer").value;
+            const phone = document.getElementById("phone").value;
+            const address = document.getElementById("address").value;
+            const payment = document.getElementById("payment").value;
+
+            const total = cart.reduce(
+                (sum, item) => sum + item.price * item.quantity, 0
+            );
+
+            const orderDetails = cart.map(item =>
+                `${item.name} x ${item.quantity}`
+            ).join(", ");
+
+            const message =
+                `Hello Golden Bites! I want to place an order.%0A` +
+                `Name: ${encodeURIComponent(name)}%0A` +
+                `Phone: ${encodeURIComponent(phone)}%0A` +
+                `Location: ${encodeURIComponent(address)}%0A` +
+                `Payment: ${encodeURIComponent(payment)}%0A` +
+                `Order: ${encodeURIComponent(orderDetails)}%0A` +
+                `Total: KSh ${total}`;
+
+            document.getElementById("order-message").textContent =
+                "Your order details are ready. To send this order, " +
+                "connect a real restaurant WhatsApp number in the code.";
+
+            // Replace 254712345678 with the restaurant's real
+            // WhatsApp number, including country code, without +.
+            const restaurantWhatsApp = "254758209823";
+
+            
+            window.open(
+    `https://wa.me/${restaurantWhatsApp}?text=${message}`,
+    "_blank"
+);
+        }
+    );
+
+    renderCart();
+</script>
+
+</body>
+</html>
+```
