@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Maxwell Tony | Computer Science Portfolio</title>
+
+    <meta name="description"
+          content="The personal portfolio of Maxwell Tony, a Diploma in Computer Science student at Thika Technical Training Institute.">
+
+    <style>
+        /* GENERAL STYLING */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --dark: #0f172a;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --text: #475569;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--white);
+            color: var(--dark);
+            line-height: 1.7;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        section {
+            padding: 85px 0;
+            scroll-margin-top: 75px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 45px;
+        }
+
+        /* NAVIGATION */
+        header {
+            background: var(--dark);
+            color: var(--white);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 3px 15px #00000020;
+        }
+
+        nav {
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            list-style: none;
+        }
+
+        .nav-links a:hover {
+            color: #60a5fa;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            color: white;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* HOME */
+        .hero {
+            min-height: 590px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .hero-text .welcome {
+            color: var(--primary);
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            line-height: 1.15;
+            margin: 15px 0;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero-text p {
+            color: var(--text);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 7px;
+            font-weight: bold;
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .profile-wrapper {
+            display: flex;
+            justify-content: center;
+        }
+
+        .profile-image {
+            width: 320px;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 25px;
+            border: 7px solid white;
+            box-shadow: 0 15px 45px #0f172a25;
+            background: #dbeafe;
+        }
+
+        /* ABOUT */
+        .about {
+            background: var(--light);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .about-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px #00000008;
+        }
+
+        .about-card h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .about-card p {
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .personal-details {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .personal-details li {
+            margin: 10px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .personal-details strong {
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        /* SKILLS */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .skill-card {
+            padding: 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px #00000010;
+            border-color: var(--primary);
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .skill-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .skill-card p {
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        /* PROJECTS */
+        .projects {
+            background: var(--light);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .project-card {
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            transition: 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px #00000010;
+        }
+
+        .project-number {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .project-card h3 {
+            margin: 12px 0;
+            font-size: 1.4rem;
+        }
+
+        .project-card p {
+            color: var(--text);
+            margin-bottom: 18px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 3px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        .project-link {
+            display: inline-block;
+            margin-top: 18px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        /* EDUCATION */
+        .education-card {
+            max-width: 750px;
+            margin: auto;
+            padding: 30px;
+            border-left: 5px solid var(--primary);
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .education-card h3 {
+            font-size: 1.35rem;
+        }
+
+        .education-card p {
+            color: var(--text);
+        }
+
+        .education-label {
+            color: var(--primary) !important;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        /* CONTACT */
+        .contact {
+            background: var(--dark);
+            color: white;
+        }
+
+        .contact .section-subtitle {
+            color: #cbd5e1;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+        }
+
+        .contact-info, .contact-form {
+            padding: 28px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #172033;
+        }
+
+        .contact-info h3, .contact-form h3 {
+            margin-bottom: 20px;
+        }
+
+        .contact-info p {
+            margin-bottom: 18px;
+            color: #cbd5e1;
+            overflow-wrap: anywhere;
+        }
+
+        .contact-info a {
+            color: #93c5fd;
+        }
+
+        .contact-form label {
+            display: block;
+            margin: 12px 0 5px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            background: #0f172a;
+            color: white;
+            font: inherit;
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .contact-form .btn {
+            margin-top: 18px;
+        }
+
+        .form-note {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-top: 12px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #020617;
+            color: #cbd5e1;
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        footer a {
+            color: #93c5fd;
+        }
+
+        /* MOBILE RESPONSIVENESS */
+        @media (max-width: 800px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: var(--dark);
+                flex-direction: column;
+                padding: 22px;
+                gap: 18px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hero-content,
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 60px 0;
+            }
+
+            .hero-content {
+                gap: 35px;
+            }
+
+            .profile-image {
+                width: 260px;
+                height: 280px;
+            }
+
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 65px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .personal-details strong {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <header>
+        <nav class="container">
+            <a href="#home" class="logo">Maxwell<span>.</span></a>
+
+            <button class="menu-toggle"
+                    id="menuToggle"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false">
+                ☰
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#education">Education</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- HOME SECTION -->
+    <section class="hero" id="home">
+        <div class="container hero-content">
+
+            <div class="hero-text">
+                <p class="welcome">Welcome to my portfolio</p>
+
+                <h1>Hello, I'm <span>Maxwell Tony</span></h1>
+
+                <p>
+                    A Diploma in Computer Science student passionate about
+                    web development, technology, software solutions, and
+                    creating digital experiences that solve real problems.
+                </p>
+
+                <div class="buttons">
+                    <a href="#projects" class="btn">View My Projects</a>
+                    <a href="#contact" class="btn btn-outline">
+                        Contact Me
+                    </a>
+                </div>
+            </div>
+
+            <div class="profile-wrapper">
+                <img
+                    src="profile.jpg"
+                    alt="Maxwell Tony profile photo"
+                    class="profile-image"
+                    onerror="this.style.display='none'; document.getElementById('photoMessage').style.display='block';">
+
+                <div id="photoMessage"
+                     style="display:none; width:260px; height:280px;
+                     border-radius:25px; background:#dbeafe;
+                     color:#1d4ed8; text-align:center; padding:80px 20px;">
+                    Add your photo as <strong>profile.jpg</strong>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+
+            <p class="section-subtitle">
+                Get to know me, my background, and my interests.
+            </p>
+
+            <div class="about-content">
+
+                <div class="about-card">
+                    <h3>Who I Am</h3>
+
+                    <p>
+                        My name is Maxwell Tony. I am a Computer Science
+                        diploma student interested in building websites,
+                        learning programming, and using technology to
+                        address everyday challenges.
+                    </p>
+
+                    <p>
+                        I enjoy learning by creating practical projects
+                        and improving my technical skills.
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h3>Personal Information</h3>
+
+                    <ul class="personal-details">
+                        <li><strong>Name:</strong> Maxwell Tony</li>
+                        <li><strong>Course:</strong> Diploma in Computer Science</li>
+                        <li><strong>Institution:</strong> Thika Technical Training Institute</li>
+                        <li><strong>Location:</strong> Thika, Kiambu County, Kenya</li>
+                        <li><strong>Email:</strong>
+                            <a href="mailto:Maxwelltonny56@gmail.com">
+                                Maxwelltonny56@gmail.com
+                            </a>
+                        </li>
+                        <li><strong>Phone:</strong>
+                            <a href="tel:0758209823">0758209823</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SKILLS SECTION -->
+    <section id="skills">
+        <div class="container">
+            <h2 class="section-title">My Skills</h2>
+
+            <p class="section-subtitle">
+                Technologies and skills I am learning and developing.
+            </p>
+
+            <div class="skills-grid">
+
+                <div class="skill-card">
+                    <div class="skill-icon">💻</div>
+                    <h3>HTML</h3>
+                    <p>Building the structure of websites.</p>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-icon">🎨</div>
+                    <h3>CSS</h3>
+                    <p>Creating attractive and responsive web designs.</p>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-icon">⚡</div>
+                    <h3>JavaScript</h3>
+                    <p>Adding interaction and functionality to websites.</p>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-icon">🐍</div>
+                    <h3>Python</h3>
+                    <p>Learning programming and problem-solving.</p>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-icon">🖌️</div>
+                    <h3>Graphic Design</h3>
+                    <p>Designing creative materials using Canva.</p>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-icon">🌐</div>
+                    <h3>GitHub</h3>
+                    <p>Managing projects and publishing websites.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section class="projects" id="projects">
+        <div class="container">
+            <h2 class="section-title">My Projects</h2>
+
+            <p class="section-subtitle">
+                Some of the projects I am building and developing.
+            </p>
+
+            <div class="projects-grid">
+
+                <article class="project-card">
+                    <span class="project-number">PROJECT 01</span>
+
+                    <h3>Personal Portfolio Website</h3>
+
+                    <p>
+                        A personal website showcasing my background,
+                        skills, projects, and contact information.
+                    </p>
+
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                    <span class="tag">JavaScript</span>
+
+                    <br>
+
+                    <a class="project-link"
+                       href="https://maxwelltonny56-droid.github.io/maxwell-tonny/"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Visit Portfolio ↗️
+                    </a>
+                </article>
+
+                <article class="project-card">
+                    <span class="project-number">PROJECT 02</span>
+
+                    <h3>Attachment Finder App</h3>
+
+                    <p>
+                        A project designed to help students discover
+                        industrial attachment opportunities and access
+                        useful information.
+                    </p>
+
+                    <span class="tag">Web Development</span>
+                    <span class="tag">Student Project</span>
+
+                    <br>
+
+                    <a class="project-link"
+                       href="https://maxwelltonny56-droid.github.io/maxwell-tonny/app1.html"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Open Attachment Finder ↗️
+                    </a>
+                </article>
+
+                <article class="project-card">
+                    <span class="project-number">PROJECT 03</span>
+
+                    <h3>SmartBiz Shopping Website</h3>
+
+                    <p>
+                        An e-commerce demonstration featuring products,
+                        product categories, search, and a shopping cart.
+                    </p>
+
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                    <span class="tag">JavaScript</span>
+
+                    <br>
+
+                    <a class="project-link"
+                       href="https://github.com/maxwelltonny56-droid"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        View My GitHub ↗️
+                    </a>
+                </article>
+
+                <article class="project-card">
+                    <span class="project-number">PROJECT 04</span>
+
+                    <h3>Golden Bites Food Website</h3>
+
+                    <p>
+                        A food-ordering website project exploring online
+                        orders and integration with payment services.
+                    </p>
+
+                    <span class="tag">Web Development</span>
+                    <span class="tag">Payment Integration</span>
+
+                    <br>
+
+                    <a class="project-link"
+                       href="https://github.com/maxwelltonny56-droid"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Explore My Projects ↗️
+                    </a>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- EDUCATION SECTION -->
+    <section id="education">
+        <div class="container">
+            <h2 class="section-title">Education</h2>
+
+            <p class="section-subtitle">
+                My academic background.
+            </p>
+
+            <div class="education-card">
+                <h3>Thika Technical Training Institute</h3>
+
+                <p class="education-label">
+                    Diploma in Computer Science
+                </p>
+
+                <p>
+                    Currently pursuing studies in Computer Science,
+                    developing technical knowledge and practical skills
+                    in computing, programming, and information technology.
+                </p>
+
+                <p><strong>Location:</strong> Thika, Kiambu County, Kenya</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="contact" id="contact">
+        <div class="container">
+
+            <h2 class="section-title">Contact Me</h2>
+
+            <p class="section-subtitle">
+                Interested in working together or discussing a project?
+                Feel free to reach out.
+            </p>
+
+            <div class="contact-content">
+
+                <div class="contact-info">
+                    <h3>Get In Touch</h3>
+
+                    <p>
+                        📧 Email:
+                        <a href="mailto:Maxwelltonny56@gmail.com">
+                            Maxwelltonny56@gmail.com
+                        </a>
+                    </p>
+
+                    <p>
+                        📞 Phone:
+                        <a href="tel:0758209823">0758209823</a>
+                    </p>
+
+                    <p>
+                        📞 Alternative phone:
+                        <a href="tel:0140553797">0140553797</a>
+                    </p>
+
+                    <p>
+                        📍 Location: Thika, Kiambu County, Kenya
+                    </p>
+
+                    <p>
+                        💻 GitHub:
+                        <a href="https://github.com/maxwelltonny56-droid"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Visit my GitHub profile
+                        </a>
+                    </p>
+                </div>
+
+                <div class="contact-form">
+                    <h3>Send Me a Message</h3>
+
+                    <form id="contactForm">
+
+                        <label for="visitorName">Your Name</label>
+                        <input type="text"
+                               id="visitorName"
+                               placeholder="Enter your name"
+                               required>
+
+                        <label for="visitorEmail">Your Email</label>
+                        <input type="email"
+                               id="visitorEmail"
+                               placeholder="Enter your email"
+                               required>
+
+                        <label for="visitorMessage">Your Message</label>
+                        <textarea id="visitorMessage"
+                                  placeholder="Write your message..."
+                                  required></textarea>
+
+                        <button type="submit" class="btn">
+                            Send via Email
+                        </button>
+
+                        <p class="form-note">
+                            This form opens your email application.
+                            It does not send messages through a server.
+                        </p>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>
+            &copy; <span id="year"></span> Maxwell Tony.
+            All rights reserved.
+        </p>
+
+        <p>Designed and developed with HTML, CSS and JavaScript.</p>
+    </footer>
+
+    <script>
+        // Update the copyright year automatically.
+        document.getElementById("year").textContent =
+            new Date().getFullYear();
+
+        // Mobile navigation menu.
+        const menuToggle = document.getElementById("menuToggle");
+        const navLinks = document.getElementById("navLinks");
+
+        menuToggle.addEventListener("click", function () {
+            navLinks.classList.toggle("active");
+
+            const isOpen = navLinks.classList.contains("active");
+
+            menuToggle.setAttribute("aria-expanded", isOpen);
+            menuToggle.textContent = isOpen ? "✕" : "☰";
+        });
+
+        // Close the mobile menu after selecting a section.
+        document.querySelectorAll("#navLinks a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                navLinks.classList.remove("active");
+                menuToggle.setAttribute("aria-expanded", "false");
+                menuToggle.textContent = "☰";
+            });
+        });
+
+        // Contact form: prepare an email in the visitor's email app.
+        document.getElementById("contactForm").addEventListener(
+            "submit",
+            function (event) {
+                event.preventDefault();
+
+                const name =
+                    document.getElementById("visitorName").value.trim();
+
+                const email =
+                    document.getElementById("visitorEmail").value.trim();
+
+                const message =
+                    document.getElementById("visitorMessage").value.trim();
+
+                const subject = encodeURIComponent(
+                    "Portfolio enquiry from " + name
+                );
+
+                const body = encodeURIComponent(
+                    "Name: " + name +
+                    "\nEmail: " + email +
+                    "\n\nMessage:\n" + message
+                );
+
+                window.location.href =
+                    "mailto:Maxwelltonny56@gmail.com" +
+                    "?subject=" + subject +
+                    "&body=" + body;
+            }
+        );
+    </script>
+
+</body>
+</html>
