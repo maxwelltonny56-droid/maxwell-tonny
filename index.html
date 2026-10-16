@@ -53,6 +53,9 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--card);borde
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .tag{background:var(--tint);color:var(--blue-d);font-size:.8rem;font-weight:500;padding:3px 10px;border-radius:999px}
 .tag.g{background:var(--gtint);color:var(--green)}
+.tag.soon{background:#fff3cd;color:#8a6100;font-weight:700}
+.tag.closed{background:#fde2e2;color:#b42318;font-weight:700}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tag.soon{background:#3a2f0b;color:#f5c542}:root:not([data-theme="light"]) .tag.closed{background:#3d1717;color:#ff8a80}}
 .save{border:1.5px solid var(--line);background:none;color:var(--mute);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;font-size:.85rem;white-space:nowrap}
 .save[aria-pressed="true"]{border-color:var(--green);color:var(--green);font-weight:700}
 .more{display:none;border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:.95rem}
@@ -110,6 +113,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
       <select id="fCounty" aria-label="County"></select>
       <select id="fField" aria-label="Field"></select>
       <select id="fMode" aria-label="Work mode"><option value="">Any work mode</option><option>On-site</option><option>Hybrid</option><option>Remote</option></select>
+      <select id="fSort" aria-label="Sort by"><option value="new">Newest first</option><option value="soon">Closing soonest</option></select>
     </div>
   </div>
   <div class="meta"><span id="count"></span>
@@ -216,13 +220,20 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 /* Paste your Cloudflare Turnstile SITE KEY (public) here. Never put the secret key in this file. */
 const TURNSTILE_SITE_KEY="0x4AAAAAAFSgntEVcrIXGn0h";
 
-const COUNTIES=["Nairobi","Busia","Kitui","Makueni","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Machakos","Kajiado","Nyeri","Meru","Kakamega","Kilifi","Garissa","Kirinyaga","Mandera","Embu","Kisii","Bungoma","Nyandarua","Laikipia","Turkana","Other county"];
+const COUNTIES=["Baringo","Bomet","Bungoma","Busia","Elgeyo-Marakwet","Embu","Garissa","Homa Bay","Isiolo","Kajiado","Kakamega","Kericho","Kiambu","Kilifi","Kirinyaga","Kisii","Kisumu","Kitui","Kwale","Laikipia","Lamu","Machakos","Makueni","Mandera","Marsabit","Meru","Migori","Mombasa","Murang'a","Nairobi","Nakuru","Nandi","Narok","Nyamira","Nyandarua","Nyeri","Samburu","Siaya","Taita-Taveta","Tana River","Tharaka-Nithi","Trans Nzoia","Turkana","Uasin Gishu","Vihiga","Wajir","West Pokot"];
 const FIELDS=["Engineering","ICT-Computer science","CPA","Business & Finance","Education","Health & Nursing","Agriculture","Media & Communication","Law","Hospitality & Tourism","Other"];
 const YEARS=["Year 1","Year 2","Year 3","Year 4","Year 5","Graduate"];
 const $=s=>document.querySelector(s);
 const safe=(k,v)=>{try{if(v===undefined){return JSON.parse(localStorage.getItem(k))}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fd=s=>{const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})};
+
+/* ---------- Deadlines ---------- */
+const todayStr=()=>{const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")};
+function daysLeft(d){if(!d)return null;const [y,m,da]=String(d).split("-").map(Number);if(!y)return null;const t=new Date();return Math.round((new Date(y,m-1,da)-new Date(t.getFullYear(),t.getMonth(),t.getDate()))/864e5)}
+function dlTag(d){const n=daysLeft(d);if(n===null)return"";if(n<0)return'<span class="tag closed">Closed</span>';if(n===0)return'<span class="tag soon">Closes today</span>';if(n<=7)return`<span class="tag soon">Closes in ${n} day${n>1?"s":""}</span>`;return""}
+const isOpen=v=>{const n=daysLeft(v.dead);return n===null||n>=0};
+
 let vacancies=[],myApps=[],orgApps=[],user=null,saved=new Set(safe("af_saved")||[]),onlySaved=false,showApps=false,recovering=false,pendingApply=null,applyingId=null,ctxRole="student",mode="login";
 let premMap=new Map();
 const roleOf=()=>user&&user.user_metadata&&user.user_metadata.role==="student"?"student":"organization";
@@ -266,7 +277,7 @@ function card(v,mine){
   return `<article class="card ${v.type==="Internship"?"intern":""}${v.prem?" featured":""}">
   <div class="top"><div><h3>${esc(v.title)}${v.prem?' <span class="feat">Featured</span>':""}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}${v.prem?' <span class="prem">Premium</span>':""}</div></div>
   ${mine?"":`<button class="save" aria-pressed="${saved.has(v.id)}" data-save="${v.id}">${saved.has(v.id)?"Saved":"Save"}</button>`}</div>
-  <div class="tags"><span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
+  <div class="tags">${dlTag(v.dead)}<span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
   <div class="more"><p><b>Requirements:</b> ${esc(v.req)}</p><p><b>Apply by:</b> ${fd(v.dead)}<br><b>Contact:</b> ${esc(v.contact)}</p></div>
   <div class="row"><button class="btn ghost" data-toggle="1">View details</button>${btns}</div>${box}</article>`;
 }
@@ -274,7 +285,8 @@ function card(v,mine){
 function render(){
   renderPrem();
   const q=$("#q").value.trim().toLowerCase(),t=$("#fType").value,c=$("#fCounty").value,f=$("#fField").value,m=$("#fMode").value;
-  const r=vacancies.filter(v=>(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
+  const r=vacancies.filter(v=>isOpen(v)&&(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
+  if($("#fSort").value==="soon")r.sort((a,b)=>(b.prem-a.prem)||((daysLeft(a.dead)??1e9)-(daysLeft(b.dead)??1e9)));
   $("#count").textContent=r.length+(r.length===1?" vacancy found":" vacancies found");
   $("#list").innerHTML=r.length?r.map(v=>card(v)).join(""):`<div class="empty"><b>No vacancies match yet.</b><br>Try another county or clear a filter.</div>`;
   $("#appsList").innerHTML=myApps.length?myApps.map(myAppRow).join(""):`<div class="empty">You haven't applied yet. Find a vacancy and press Apply.</div>`;
@@ -288,7 +300,7 @@ async function load(){
   const [{data,error},pr]=await Promise.all([sb.from("vacancies").select("*").order("created_at",{ascending:false}),sb.from("org_premium").select("org_id,premium_until")]);
   if(error){toast("Could not load vacancies. Check your connection.");console.error(error);return}
   premMap=new Map(((pr&&pr.data)||[]).map(p=>[p.org_id,p.premium_until]));
-  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements,prem:premMap.has(r.owner)}));
+  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements,prem:!!premMap.get(r.owner)&&new Date(premMap.get(r.owner))>new Date()}));
   vacancies.sort((a,b)=>b.prem-a.prem);
   render();
 }
@@ -366,7 +378,7 @@ document.addEventListener("change",async e=>{
   toast("Status updated");
 });
 
-["q","fType","fCounty","fField","fMode"].forEach(id=>$("#"+id).addEventListener("input",render));
+["q","fType","fCounty","fField","fMode","fSort"].forEach(id=>$("#"+id).addEventListener("input",render));
 $("#go").onclick=render;
 $("#onlySaved").onclick=function(){onlySaved=!onlySaved;this.setAttribute("aria-pressed",onlySaved);render()};
 $("#myApps").onclick=()=>{showApps=!showApps;render()};
@@ -474,6 +486,7 @@ sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));
 /* ---------- Post a vacancy ---------- */
 $("#form").addEventListener("submit",async e=>{
   e.preventDefault();
+  if($("#oDead").value<todayStr())return toast("Deadline cannot be in the past");
   const row={org:$("#oName").value.trim(),title:$("#oTitle").value.trim(),type:$("#oType").value,field:$("#oField").value,county:$("#oCounty").value,town:$("#oTown").value.trim(),mode:$("#oMode").value,duration:$("#oDur").value.trim(),deadline:$("#oDead").value,contact:$("#oContact").value.trim(),requirements:$("#oReq").value.trim()};
   const {error}=await sb.from("vacancies").insert(row);
   if(error)return toast(error.message);
@@ -503,7 +516,7 @@ $("#applyForm").addEventListener("submit",async e=>{
 
 /* ---------- Premium for organizations ---------- */
 const BACKEND="https://smartbiz-backend-iz1h.onrender.com";
-function myPremUntil(){const d=user&&premMap.get(user.id);return d?new Date(d):null}
+function myPremUntil(){const d=user&&premMap.get(user.id);return d&&new Date(d)>new Date()?new Date(d):null}
 function renderPrem(){
   const org=!!user&&roleOf()==="organization";
   $("#premBox").hidden=!org;
@@ -542,6 +555,7 @@ async function waitForPremium(){
   toast("We have not received the payment yet. Refresh the page in a minute to check.");
 }
 
+$("#oDead").min=todayStr();
 load();refreshUser();
 </script>
 </body>
