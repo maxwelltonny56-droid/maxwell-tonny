@@ -83,6 +83,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
 .msg{font-weight:700;color:var(--blue-d);min-height:1.3em;margin:6px 0}
 .roles{display:flex;gap:18px}.roles label{font-weight:500;display:flex;gap:6px;align-items:center}.roles input{width:auto}
 #tsBox{margin:8px 0;min-height:65px}
+.sec{margin:26px 0 10px;font-size:1.15rem}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -95,6 +96,7 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
   <nav role="tablist" aria-label="Choose your role">
     <button role="tab" id="tabS" aria-selected="true">I'm a student</button>
     <button role="tab" id="tabO" aria-selected="false">I'm an organization</button>
+    <button role="tab" id="tabA" aria-selected="false" hidden>Admin</button>
   </nav>
   <div class="who"><span id="hdrUser"></span><button class="save" id="hdrAuth" type="button">Log in</button></div>
 </div></header>
@@ -162,6 +164,17 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
   <div class="meta"><span>Your posted vacancies</span></div>
   <div class="list" id="mine"></div>
 </section>
+
+<section id="admin" hidden>
+  <div class="hero">
+    <h1>Admin</h1>
+    <p class="sub">Review reports, hide or delete scam vacancies, and verify real organizations.</p>
+  </div>
+  <h2 class="sec">Open reports <span class="hint" id="repCount"></span></h2>
+  <div class="list" id="repList"></div>
+  <h2 class="sec">All vacancies</h2>
+  <div class="list" id="admList"></div>
+</section>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -203,6 +216,18 @@ dialog::backdrop{background:rgba(10,20,40,.55)}
   </form>
 </dialog>
 
+<dialog id="reportDlg">
+  <button class="x" data-close="reportDlg" aria-label="Close" type="button">&times;</button>
+  <h2 id="reportTitle" style="margin-top:0;padding-right:30px"></h2>
+  <form id="reportForm">
+    <div class="f"><label for="rReason">What is wrong with this vacancy?</label>
+      <select id="rReason"><option>Scam or asks for money</option><option>Fake organization</option><option>Wrong or misleading details</option><option>Offensive content</option><option>Already filled or closed</option><option>Other</option></select></div>
+    <div class="f"><label for="rNote">More details <span class="hint">(optional)</span></label><textarea id="rNote" rows="3" maxlength="500"></textarea></div>
+    <p class="msg" role="alert"></p>
+    <button class="btn" id="reportGo" type="submit">Send report</button>
+  </form>
+</dialog>
+
 <dialog id="premDlg">
   <button class="x" data-close="premDlg" aria-label="Close" type="button">&times;</button>
   <h2 style="margin-top:0;padding-right:30px">Go Premium</h2>
@@ -236,6 +261,9 @@ const isOpen=v=>{const n=daysLeft(v.dead);return n===null||n>=0};
 
 let vacancies=[],myApps=[],orgApps=[],user=null,saved=new Set(safe("af_saved")||[]),onlySaved=false,showApps=false,recovering=false,pendingApply=null,applyingId=null,ctxRole="student",mode="login";
 let premMap=new Map();
+let reports=[],pendingReport=null,reportingId=null;
+const ADMIN_EMAIL="maxwelltonny56@gmail.com";
+const isAdmin=()=>!!user&&!!user.email&&user.email.toLowerCase()===ADMIN_EMAIL;
 const roleOf=()=>user&&user.user_metadata&&user.user_metadata.role==="student"?"student":"organization";
 
 /* ---------- Cloudflare Turnstile ---------- */
@@ -272,20 +300,20 @@ function card(v,mine){
   const applied=myApps.some(a=>a.vacancy_id===v.id);
   const btns=mine
     ?`<button class="btn ghost" data-apps="1">Applicants (${list.length})</button><button class="btn ghost" data-del="${v.id}">Remove</button>`
-    :(applied?`<button class="btn ghost" disabled>Applied</button>`:`<button class="btn" data-apply="${v.id}">Apply</button>`);
+    :(applied?`<button class="btn ghost" disabled>Applied</button>`:`<button class="btn" data-apply="${v.id}">Apply</button>`)+`<button class="btn ghost" data-report="${v.id}">Report</button>`;
   const box=mine?`<div class="appbox">${list.length?list.map(appRow).join(""):'<p class="hint">No applications yet.</p>'}</div>`:"";
   return `<article class="card ${v.type==="Internship"?"intern":""}${v.prem?" featured":""}">
   <div class="top"><div><h3>${esc(v.title)}${v.prem?' <span class="feat">Featured</span>':""}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}${v.prem?' <span class="prem">Premium</span>':""}</div></div>
   ${mine?"":`<button class="save" aria-pressed="${saved.has(v.id)}" data-save="${v.id}">${saved.has(v.id)?"Saved":"Save"}</button>`}</div>
-  <div class="tags">${dlTag(v.dead)}<span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
+  <div class="tags">${v.hidden?'<span class="tag closed">Hidden by admin</span>':""}${dlTag(v.dead)}<span class="tag ${v.type==="Internship"?"g":""}">${v.type}</span><span class="tag">${esc(v.field)}</span><span class="tag">${esc(v.town?v.town+", ":"")}${esc(v.county)}</span><span class="tag">${esc(v.mode)}</span>${v.dur?`<span class="tag">${esc(v.dur)}</span>`:""}</div>
   <div class="more"><p><b>Requirements:</b> ${esc(v.req)}</p><p><b>Apply by:</b> ${fd(v.dead)}<br><b>Contact:</b> ${esc(v.contact)}</p></div>
   <div class="row"><button class="btn ghost" data-toggle="1">View details</button>${btns}</div>${box}</article>`;
 }
 
 function render(){
-  renderPrem();
+  renderPrem();renderAdmin();
   const q=$("#q").value.trim().toLowerCase(),t=$("#fType").value,c=$("#fCounty").value,f=$("#fField").value,m=$("#fMode").value;
-  const r=vacancies.filter(v=>isOpen(v)&&(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
+  const r=vacancies.filter(v=>!v.hidden&&isOpen(v)&&(!q||(v.title+v.org+v.req+v.field).toLowerCase().includes(q))&&(!t||v.type===t)&&(!c||v.county===c)&&(!f||v.field===f)&&(!m||v.mode===m)&&(!onlySaved||saved.has(v.id)));
   if($("#fSort").value==="soon")r.sort((a,b)=>(b.prem-a.prem)||((daysLeft(a.dead)??1e9)-(daysLeft(b.dead)??1e9)));
   $("#count").textContent=r.length+(r.length===1?" vacancy found":" vacancies found");
   $("#list").innerHTML=r.length?r.map(v=>card(v)).join(""):`<div class="empty"><b>No vacancies match yet.</b><br>Try another county or clear a filter.</div>`;
@@ -300,7 +328,7 @@ async function load(){
   const [{data,error},pr]=await Promise.all([sb.from("vacancies").select("*").order("created_at",{ascending:false}),sb.from("org_premium").select("org_id,premium_until")]);
   if(error){toast("Could not load vacancies. Check your connection.");console.error(error);return}
   premMap=new Map(((pr&&pr.data)||[]).map(p=>[p.org_id,p.premium_until]));
-  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements,prem:!!premMap.get(r.owner)&&new Date(premMap.get(r.owner))>new Date()}));
+  vacancies=data.map(r=>({id:r.id,owner:r.owner,org:r.org,ver:r.verified,hidden:!!r.hidden,title:r.title,type:r.type,field:r.field,county:r.county,town:r.town,mode:r.mode,dur:r.duration,dead:r.deadline,contact:r.contact,req:r.requirements,prem:!!premMap.get(r.owner)&&new Date(premMap.get(r.owner))>new Date()}));
   vacancies.sort((a,b)=>b.prem-a.prem);
   render();
 }
@@ -330,7 +358,11 @@ async function refreshUser(){
   $("#gateMsg").textContent=!user?"Log in or create an organization account to post vacancies and review applicants.":"You're signed in with a student account. Log out, then use an organization account to post vacancies.";
   $("#gateBtn").hidden=!!user;
   $("#myApps").hidden=!(user&&roleOf()==="student");
+  $("#tabA").hidden=!isAdmin();
+  if(!isAdmin()&&!$("#admin").hidden)show("s");
   await loadApps();
+  await loadReports();
+  if(user&&pendingReport){const id=pendingReport;pendingReport=null;openReport(id)}
   if(user&&pendingApply&&roleOf()==="student"){const id=pendingApply;pendingApply=null;openApply(id)}
 }
 
@@ -364,6 +396,12 @@ document.addEventListener("click",async e=>{
     if(error){if(w)w.close();return toast(error.message)}
     if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,"_blank");
   }
+  if(b.dataset.report){
+    const id=b.dataset.report;
+    if(!user){pendingReport=id;return openAuth("login","student")}
+    openReport(id);
+  }
+  if(b.dataset.adm){await adminAct(b.dataset.adm,b.dataset.id,b.dataset.rid)}
   if(b.dataset.del){
     if(!confirm("Remove this vacancy and its applications?"))return;
     const {error}=await sb.from("vacancies").delete().eq("id",b.dataset.del);
@@ -382,11 +420,11 @@ document.addEventListener("change",async e=>{
 $("#go").onclick=render;
 $("#onlySaved").onclick=function(){onlySaved=!onlySaved;this.setAttribute("aria-pressed",onlySaved);render()};
 $("#myApps").onclick=()=>{showApps=!showApps;render()};
-function show(role){const s=role==="s";$("#student").hidden=!s;$("#org").hidden=s;$("#tabS").setAttribute("aria-selected",s);$("#tabO").setAttribute("aria-selected",!s);window.scrollTo(0,0)}
-$("#tabS").onclick=()=>show("s");$("#tabO").onclick=()=>show("o");
+function show(role){const s=role==="s",o=role==="o",a=role==="a";$("#student").hidden=!s;$("#org").hidden=!o;$("#admin").hidden=!a;$("#tabS").setAttribute("aria-selected",s);$("#tabO").setAttribute("aria-selected",o);$("#tabA").setAttribute("aria-selected",a);window.scrollTo(0,0)}
+$("#tabS").onclick=()=>show("s");$("#tabO").onclick=()=>show("o");$("#tabA").onclick=()=>show("a");
 $("#hdrAuth").onclick=()=>user?sb.auth.signOut():openAuth("login","student");
 $("#gateBtn").onclick=()=>openAuth("login","organization");
-$("#authDlg").addEventListener("close",()=>{if(!user)pendingApply=null});
+$("#authDlg").addEventListener("close",()=>{if(!user){pendingApply=null;pendingReport=null}});
 
 /* ---------- Password eye icon ---------- */
 const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -513,6 +551,67 @@ $("#applyForm").addEventListener("submit",async e=>{
     await loadApps();toast("Application sent");
   }finally{btn.disabled=false}
 });
+
+/* ---------- Report a vacancy ---------- */
+function openReport(id){
+  const v=vacancies.find(x=>x.id===id);if(!v)return;
+  reportingId=id;$("#reportTitle").textContent="Report: "+v.title+", "+v.org;
+  $("#reportDlg .msg").textContent="";
+  if(!$("#reportDlg").open)$("#reportDlg").showModal();
+}
+$("#reportForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=$("#reportGo");btn.disabled=true;
+  try{
+    const row={vacancy_id:reportingId,reason:$("#rReason").value,note:$("#rNote").value.trim()};
+    const {error}=await sb.from("reports").insert(row);
+    if(error)return toast(error.code==="23505"?"You already reported this vacancy":error.message);
+    $("#reportDlg").close();e.target.reset();toast("Report sent. Thank you");
+  }finally{btn.disabled=false}
+});
+
+/* ---------- Admin ---------- */
+async function loadReports(){
+  if(!isAdmin()){reports=[];return}
+  const {data,error}=await sb.from("reports").select("*").order("created_at",{ascending:false});
+  if(error){console.error(error);reports=[]}else reports=data;
+  render();
+}
+function repCard(r){
+  const v=vacancies.find(x=>x.id===r.vacancy_id);
+  return `<article class="card"><div class="top"><div><h3>${esc(v?v.title:"Vacancy removed")}</h3><div class="org">${esc(v?v.org:"")}${v&&v.hidden?' <span class="tag closed">Hidden</span>':""}</div></div><span class="tag soon">${esc(r.reason)}</span></div>${r.note?`<p>${esc(r.note)}</p>`:""}<p class="hint">Reported on ${fd(r.created_at)}</p>
+  <div class="row">${v?`<button class="btn ghost" data-adm="${v.hidden?"unhide":"hide"}" data-id="${v.id}">${v.hidden?"Restore vacancy":"Hide vacancy"}</button><button class="btn ghost" data-adm="del" data-id="${v.id}">Delete vacancy</button>`:""}<button class="btn" data-adm="resolve" data-rid="${r.id}">Mark resolved</button></div></article>`;
+}
+function admCard(v){
+  const n=reports.filter(r=>r.vacancy_id===v.id&&r.status==="Open").length;
+  return `<article class="card"><div class="top"><div><h3>${esc(v.title)}</h3><div class="org">${esc(v.org)} ${v.ver?'<span class="ver">Verified</span>':""}${v.hidden?' <span class="tag closed">Hidden</span>':""}</div></div>${n?`<span class="tag soon">${n} open report${n>1?"s":""}</span>`:""}</div>
+  <div class="tags"><span class="tag">${esc(v.county)}</span><span class="tag">Deadline: ${fd(v.dead)}</span></div>
+  <div class="row"><button class="btn ghost" data-adm="${v.ver?"unverify":"verify"}" data-id="${v.id}">${v.ver?"Remove verified":"Mark verified"}</button><button class="btn ghost" data-adm="${v.hidden?"unhide":"hide"}" data-id="${v.id}">${v.hidden?"Restore":"Hide"}</button><button class="btn ghost" data-adm="del" data-id="${v.id}">Delete</button></div></article>`;
+}
+function renderAdmin(){
+  if(!isAdmin())return;
+  const open=reports.filter(r=>r.status==="Open");
+  $("#repCount").textContent="("+open.length+")";
+  $("#repList").innerHTML=open.length?open.map(repCard).join(""):`<div class="empty">No open reports.</div>`;
+  $("#admList").innerHTML=vacancies.length?vacancies.map(admCard).join(""):`<div class="empty">No vacancies yet.</div>`;
+}
+async function adminAct(act,id,rid){
+  if(!isAdmin())return;
+  let res;
+  if(act==="hide")res=await sb.from("vacancies").update({hidden:true}).eq("id",id);
+  else if(act==="unhide")res=await sb.from("vacancies").update({hidden:false}).eq("id",id);
+  else if(act==="verify")res=await sb.from("vacancies").update({verified:true}).eq("id",id);
+  else if(act==="unverify")res=await sb.from("vacancies").update({verified:false}).eq("id",id);
+  else if(act==="del"){
+    if(!confirm("Delete this vacancy with its applications and reports? This cannot be undone."))return;
+    res=await sb.from("vacancies").delete().eq("id",id);
+  }
+  else if(act==="resolve")res=await sb.from("reports").update({status:"Resolved"}).eq("id",rid);
+  else return;
+  if(res.error)return toast(res.error.message);
+  toast("Done");
+  await load();await loadReports();
+}
 
 /* ---------- Premium for organizations ---------- */
 const BACKEND="https://smartbiz-backend-iz1h.onrender.com";
