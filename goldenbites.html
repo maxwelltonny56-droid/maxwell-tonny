@@ -34,21 +34,37 @@
             color: #ffc247;
         }
 
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
         nav a {
             color: white;
             text-decoration: none;
-            margin-left: 18px;
         }
 
         nav a:hover {
             color: #ffc247;
         }
 
+        /* Hamburger button */
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            color: white;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            padding: 2px 8px;
+        }
+
         .hero {
             min-height: 350px;
             padding: 70px 7%;
-            background: linear-gradient(90deg,
-                rgba(0,0,0,.85), rgba(0,0,0,.25)),
+            background:
+                linear-gradient(90deg, rgba(0,0,0,.85), rgba(0,0,0,.25)),
                 url("https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=80")
                 center/cover;
             color: white;
@@ -96,9 +112,7 @@
 
         .menu {
             display: grid;
-            grid-template-columns: repeat(
-                auto-fit, minmax(220px, 1fr)
-            );
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 25px;
         }
 
@@ -162,6 +176,7 @@
         .cart-item button {
             padding: 4px 9px;
             cursor: pointer;
+            margin: 2px;
         }
 
         .total {
@@ -194,15 +209,41 @@
             margin: 6px;
         }
 
-        @media (max-width: 600px) {
+        /* Mobile navigation */
+        @media (max-width: 768px) {
             header {
-                justify-content: center;
-                text-align: center;
+                position: relative;
+                justify-content: space-between;
+                gap: 10px;
             }
 
-            nav a {
-                margin: 6px;
-                display: inline-block;
+            header h1 {
+                font-size: 23px;
+            }
+
+            .menu-toggle {
+                display: block;
+                margin-left: auto;
+            }
+
+            header nav {
+                display: none;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                width: 100%;
+                padding: 8px 0;
+            }
+
+            header nav.active {
+                display: flex;
+            }
+
+            header nav a {
+                display: block;
+                padding: 12px 5px;
+                margin: 0;
+                border-top: 1px solid rgba(255,255,255,.15);
             }
 
             .hero {
@@ -211,6 +252,10 @@
 
             section {
                 padding: 35px 5%;
+            }
+
+            .cart-item {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -221,10 +266,20 @@
 <header>
     <h1>🍔 Golden Bites-Thika</h1>
 
-    <nav>
+    <button
+        class="menu-toggle"
+        id="menu-toggle"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        type="button"
+    >☰</button>
+
+    <nav id="nav-menu">
         <a href="#home">Home</a>
         <a href="#menu">Menu</a>
         <a href="#cart">Cart (<span id="cart-count">0</span>)</a>
+        <a href="#checkout">Checkout</a>
         <a href="#contact">Contact</a>
     </nav>
 </header>
@@ -237,7 +292,6 @@
 
 <section id="menu">
     <h2 class="section-title">Our Food Menu 🍕</h2>
-
     <div class="menu" id="food-menu"></div>
 </section>
 
@@ -256,6 +310,10 @@
         <button class="btn" onclick="goToCheckout()">
             Proceed to Order
         </button>
+
+        <button class="btn" onclick="clearCart()">
+            Clear Cart
+        </button>
     </div>
 </section>
 
@@ -265,17 +323,30 @@
     <div class="order-box">
         <form id="order-form">
             <label for="customer">Full Name</label>
-            <input id="customer" type="text"
-                   placeholder="Enter your name" required>
+            <input
+                id="customer"
+                type="text"
+                placeholder="Enter your name"
+                required
+            >
 
             <label for="phone">Phone Number</label>
-            <input id="phone" type="tel"
-                   placeholder="e.g. 0712345678" required>
+            <input
+                id="phone"
+                type="tel"
+                placeholder="e.g. 0712345678"
+                pattern="(?:07|01)[0-9]{8}"
+                title="Enter a Kenyan mobile number, e.g. 0712345678"
+                required
+            >
 
             <label for="address">Delivery Location</label>
-            <textarea id="address" rows="3"
-                      placeholder="Enter your delivery location"
-                      required></textarea>
+            <textarea
+                id="address"
+                rows="3"
+                placeholder="Enter your delivery location"
+                required
+            ></textarea>
 
             <label for="payment">Payment Method</label>
             <select id="payment" required>
@@ -284,17 +355,16 @@
                 <option value="Cash on delivery">Cash on delivery</option>
             </select>
 
-            <button type="submit" class="btn">
-                Place Order
-            </button>
+            <button type="submit" class="btn">Place Order</button>
         </form>
 
-        <p id="order-message" style="margin-top:18px;"></p>
+        <p id="order-message" role="status" style="margin-top:18px;"></p>
     </div>
 </section>
 
 <section id="contact">
     <h2 class="section-title">Contact Us 📞 0758209823</h2>
+
     <div style="text-align:center; line-height:2;">
         <p>Welcome to Golden Bites!</p>
         <p>📍 Location: Thika-opposite main stage, Kiambu County, Kenya</p>
@@ -308,6 +378,7 @@
 </footer>
 
 <script>
+    // FOOD MENU
     const foods = [
         {
             id: 1,
@@ -355,21 +426,20 @@
 
     let cart = [];
 
-    const menu = document.getElementById("food-menu");
+    const foodMenu = document.getElementById("food-menu");
 
+    // RENDER FOOD MENU
     foods.forEach(food => {
-        menu.innerHTML += `
+        foodMenu.innerHTML += `
             <div class="food-card">
-                <img src="${food.image}" alt="${food.name}"
-                     loading="lazy">
+                <img src="${food.image}" alt="${food.name}" loading="lazy">
                 <div class="food-info">
                     <h3>${food.name}</h3>
                     <p>${food.description}</p>
                     <span class="price">
                         KSh ${food.price.toLocaleString()}
                     </span>
-                    <button class="btn"
-                        onclick="addToCart(${food.id})">
+                    <button class="btn" onclick="addToCart(${food.id})">
                         Add to Cart
                     </button>
                 </div>
@@ -377,8 +447,11 @@
         `;
     });
 
+    // ADD FOOD TO CART
     function addToCart(id) {
         const food = foods.find(item => item.id === id);
+        if (!food) return;
+
         const existing = cart.find(item => item.id === id);
 
         if (existing) {
@@ -390,9 +463,9 @@
         renderCart();
     }
 
+    // CHANGE FOOD QUANTITY
     function changeQuantity(id, amount) {
         const item = cart.find(item => item.id === id);
-
         if (!item) return;
 
         item.quantity += amount;
@@ -404,13 +477,22 @@
         renderCart();
     }
 
+    // REMOVE ITEM
     function removeItem(id) {
         cart = cart.filter(item => item.id !== id);
         renderCart();
     }
 
+    // CLEAR ENTIRE CART
+    function clearCart() {
+        cart = [];
+        renderCart();
+    }
+
+    // UPDATE CART DISPLAY AND TOTAL
     function renderCart() {
         const container = document.getElementById("cart-items");
+
         const count = cart.reduce(
             (sum, item) => sum + item.quantity, 0
         );
@@ -435,12 +517,20 @@
                     <strong>${item.name}</strong><br>
                     KSh ${(item.price * item.quantity).toLocaleString()}
                 </div>
+
                 <div>
-                    <button onclick="changeQuantity(${item.id}, -1)"
-                            aria-label="Decrease ${item.name}">−</button>
+                    <button
+                        onclick="changeQuantity(${item.id}, -1)"
+                        aria-label="Decrease ${item.name}"
+                    >−</button>
+
                     ${item.quantity}
-                    <button onclick="changeQuantity(${item.id}, 1)"
-                            aria-label="Increase ${item.name}">+</button>
+
+                    <button
+                        onclick="changeQuantity(${item.id}, 1)"
+                        aria-label="Increase ${item.name}"
+                    >+</button>
+
                     <button onclick="removeItem(${item.id})">
                         Remove
                     </button>
@@ -449,6 +539,7 @@
         `).join("");
     }
 
+    // SCROLL TO CHECKOUT
     function goToCheckout() {
         if (cart.length === 0) {
             alert("Please add food to your cart first!");
@@ -460,18 +551,45 @@
         });
     }
 
+    // HAMBURGER MENU
+    const menuToggle = document.getElementById("menu-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    menuToggle.addEventListener("click", function () {
+        const isOpen = navMenu.classList.toggle("active");
+
+        menuToggle.textContent = isOpen ? "✕" : "☰";
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+        menuToggle.setAttribute(
+            "aria-label",
+            isOpen ? "Close navigation menu" : "Open navigation menu"
+        );
+    });
+
+    // CLOSE MENU AFTER CLICKING A NAVIGATION LINK
+    navMenu.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", function () {
+            navMenu.classList.remove("active");
+            menuToggle.textContent = "☰";
+            menuToggle.setAttribute("aria-expanded", "false");
+            menuToggle.setAttribute("aria-label", "Open navigation menu");
+        });
+    });
+
+    // WHATSAPP ORDER CHECKOUT
     document.getElementById("order-form").addEventListener(
-        "submit", function(event) {
+        "submit",
+        function (event) {
             event.preventDefault();
 
             if (cart.length === 0) {
-                alert("Your cart is empty!");
+                alert("Your cart is empty! Add food before placing an order.");
                 return;
             }
 
-            const name = document.getElementById("customer").value;
-            const phone = document.getElementById("phone").value;
-            const address = document.getElementById("address").value;
+            const name = document.getElementById("customer").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const address = document.getElementById("address").value.trim();
             const payment = document.getElementById("payment").value;
 
             const total = cart.reduce(
@@ -479,37 +597,40 @@
             );
 
             const orderDetails = cart.map(item =>
-                `${item.name} x ${item.quantity}`
-            ).join(", ");
+                `${item.name} x ${item.quantity} - KSh ${
+                    (item.price * item.quantity).toLocaleString()
+                }`
+            ).join("\n");
 
             const message =
-                `Hello Golden Bites! I want to place an order.%0A` +
-                `Name: ${encodeURIComponent(name)}%0A` +
-                `Phone: ${encodeURIComponent(phone)}%0A` +
-                `Location: ${encodeURIComponent(address)}%0A` +
-                `Payment: ${encodeURIComponent(payment)}%0A` +
-                `Order: ${encodeURIComponent(orderDetails)}%0A` +
-                `Total: KSh ${total}`;
+                `Hello Golden Bites! I want to place an order.\n\n` +
+                `Name: ${name}\n` +
+                `Phone: ${phone}\n` +
+                `Location: ${address}\n` +
+                `Payment: ${payment}\n\n` +
+                `Order:\n${orderDetails}\n\n` +
+                `Total: KSh ${total.toLocaleString()}`;
 
-            document.getElementById("order-message").textContent =
-                "Your order details are ready. To send this order, " +
-                "connect a real restaurant WhatsApp number in the code.";
-
-            // Replace 254712345678 with the restaurant's real
-            // WhatsApp number, including country code, without +.
+            // Replace with the real business WhatsApp number.
+            // Use country code 254 without the + sign.
             const restaurantWhatsApp = "254758209823";
 
-            
-            window.open(
-    `https://wa.me/${restaurantWhatsApp}?text=${message}`,
-    "_blank"
-);
+            const whatsappURL =
+                `https://wa.me/${restaurantWhatsApp}?text=${
+                    encodeURIComponent(message)
+                }`;
+
+            document.getElementById("order-message").textContent =
+                "WhatsApp is opening with your order. " +
+                "Review the details and press Send to submit it.";
+
+            window.open(whatsappURL, "_blank");
         }
     );
 
+    // INITIALIZE CART
     renderCart();
 </script>
 
 </body>
 </html>
-```
