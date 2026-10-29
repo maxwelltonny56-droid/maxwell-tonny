@@ -1,8 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="<meta name="google-site-verification" content="-FpAeqcYNp-3JcMqup13q6OaNeOH-UMnRQ7TTp30Aqg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="google-site-verification" content="-FpAeqcYNp-3JcMqup13q6OaNeOH-UMnRQ7TTp30Aqg">
 
     <title>Maxwell Tony | Computer Science Portfolio</title>
 
@@ -106,6 +109,13 @@
             border: none;
             font-size: 1.8rem;
             cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .menu-toggle:focus-visible,
+        .nav-links a:focus-visible {
+            outline: 2px solid #60a5fa;
+            outline-offset: 4px;
         }
 
         /* HOME */
@@ -374,14 +384,16 @@
             gap: 35px;
         }
 
-        .contact-info, .contact-form {
+        .contact-info,
+        .contact-form {
             padding: 28px;
             border: 1px solid #334155;
             border-radius: 12px;
             background: #172033;
         }
 
-        .contact-info h3, .contact-form h3 {
+        .contact-info h3,
+        .contact-form h3 {
             margin-bottom: 20px;
         }
 
@@ -440,6 +452,13 @@
 
         /* MOBILE RESPONSIVENESS */
         @media (max-width: 800px) {
+            nav.container {
+                position: relative;
+                flex-wrap: wrap;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+
             .menu-toggle {
                 display: block;
             }
@@ -447,17 +466,24 @@
             .nav-links {
                 display: none;
                 position: absolute;
-                top: 70px;
+                top: 100%;
                 left: 0;
                 width: 100%;
                 background: var(--dark);
                 flex-direction: column;
-                padding: 22px;
-                gap: 18px;
+                align-items: stretch;
+                padding: 15px 20px 22px;
+                gap: 0;
+                box-shadow: 0 8px 15px #00000020;
             }
 
             .nav-links.active {
                 display: flex;
+            }
+
+            .nav-links li a {
+                display: block;
+                padding: 10px 5px;
             }
 
             .hero-content,
@@ -521,8 +547,10 @@
 
             <button class="menu-toggle"
                     id="menuToggle"
+                    type="button"
                     aria-label="Open navigation menu"
-                    aria-expanded="false">
+                    aria-expanded="false"
+                    aria-controls="navLinks">
                 ☰
             </button>
 
@@ -540,7 +568,6 @@
     <!-- HOME SECTION -->
     <section class="hero" id="home">
         <div class="container hero-content">
-
             <div class="hero-text">
                 <p class="welcome">Welcome to my portfolio</p>
 
@@ -574,7 +601,6 @@
                     Add your photo as <strong>profile.jpg</strong>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -588,7 +614,6 @@
             </p>
 
             <div class="about-content">
-
                 <div class="about-card">
                     <h3>Who I Am</h3>
 
@@ -613,17 +638,18 @@
                         <li><strong>Course:</strong> Diploma in Computer Science</li>
                         <li><strong>Institution:</strong> Thika Technical Training Institute</li>
                         <li><strong>Location:</strong> Thika, Kiambu County, Kenya</li>
-                        <li><strong>Email:</strong>
+                        <li>
+                            <strong>Email:</strong>
                             <a href="mailto:Maxwelltonny56@gmail.com">
                                 Maxwelltonny56@gmail.com
                             </a>
                         </li>
-                        <li><strong>Phone:</strong>
+                        <li>
+                            <strong>Phone:</strong>
                             <a href="tel:0758209823">0758209823</a>
                         </li>
                     </ul>
                 </div>
-
             </div>
         </div>
     </section>
@@ -638,7 +664,6 @@
             </p>
 
             <div class="skills-grid">
-
                 <div class="skill-card">
                     <div class="skill-icon"></div>
                     <h3>HTML</h3>
@@ -674,7 +699,6 @@
                     <h3>GitHub</h3>
                     <p>Managing projects and publishing websites.</p>
                 </div>
-
             </div>
         </div>
     </section>
@@ -689,7 +713,6 @@
             </p>
 
             <div class="projects-grid">
-
                 <article class="project-card">
                     <span class="project-number">PROJECT 01</span>
 
@@ -707,10 +730,10 @@
                     <br>
 
                     <a class="project-link"
-                       href="https://maxwelltonny56-droid.github.io/maxwell-tonny/"
+                       href="https://maxwelltonny56-droid.github.io/maxwell-tonny/latest.html"
                        target="_blank"
                        rel="noopener noreferrer">
-                        Visit Portfolio ↗️
+                        Visit Portfolio ↗
                     </a>
                 </article>
 
@@ -734,7 +757,7 @@
                        href="https://maxwelltonny56-droid.github.io/maxwell-tonny/app1.html"
                        target="_blank"
                        rel="noopener noreferrer">
-                        Open Attachment Finder ↗️
+                        Open Attachment Finder ↗
                     </a>
                 </article>
 
@@ -758,7 +781,7 @@
                        href="https://github.com/maxwelltonny56-droid"
                        target="_blank"
                        rel="noopener noreferrer">
-                        View My GitHub ↗️
+                        View My GitHub ↗
                     </a>
                 </article>
 
@@ -781,10 +804,9 @@
                        href="https://github.com/maxwelltonny56-droid"
                        target="_blank"
                        rel="noopener noreferrer">
-                        Explore My Projects ↗️
+                        Explore My Projects ↗
                     </a>
                 </article>
-
             </div>
         </div>
     </section>
@@ -811,7 +833,10 @@
                     in computing, programming, and information technology.
                 </p>
 
-                <p><strong>Location:</strong> Thika, Kiambu County, Kenya</p>
+                <p>
+                    <strong>Location:</strong>
+                    Thika, Kiambu County, Kenya
+                </p>
             </div>
         </div>
     </section>
@@ -819,7 +844,6 @@
     <!-- CONTACT SECTION -->
     <section class="contact" id="contact">
         <div class="container">
-
             <h2 class="section-title">Contact Me</h2>
 
             <p class="section-subtitle">
@@ -828,7 +852,6 @@
             </p>
 
             <div class="contact-content">
-
                 <div class="contact-info">
                     <h3>Get In Touch</h3>
 
@@ -867,21 +890,25 @@
                     <h3>Send Me a Message</h3>
 
                     <form id="contactForm">
-
                         <label for="visitorName">Your Name</label>
                         <input type="text"
                                id="visitorName"
+                               name="visitorName"
                                placeholder="Enter your name"
+                               autocomplete="name"
                                required>
 
                         <label for="visitorEmail">Your Email</label>
                         <input type="email"
                                id="visitorEmail"
+                               name="visitorEmail"
                                placeholder="Enter your email"
+                               autocomplete="email"
                                required>
 
                         <label for="visitorMessage">Your Message</label>
                         <textarea id="visitorMessage"
+                                  name="visitorMessage"
                                   placeholder="Write your message..."
                                   required></textarea>
 
@@ -895,7 +922,6 @@
                         </p>
                     </form>
                 </div>
-
             </div>
         </div>
     </section>
@@ -920,19 +946,23 @@
         const navLinks = document.getElementById("navLinks");
 
         menuToggle.addEventListener("click", function () {
-            navLinks.classList.toggle("active");
+            const isOpen = navLinks.classList.toggle("active");
 
-            const isOpen = navLinks.classList.contains("active");
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+            menuToggle.setAttribute(
+                "aria-label",
+                isOpen ? "Close navigation menu" : "Open navigation menu"
+            );
 
-            menuToggle.setAttribute("aria-expanded", isOpen);
             menuToggle.textContent = isOpen ? "✕" : "☰";
         });
 
         // Close the mobile menu after selecting a section.
-        document.querySelectorAll("#navLinks a").forEach(function (link) {
+        navLinks.querySelectorAll("a").forEach(function (link) {
             link.addEventListener("click", function () {
                 navLinks.classList.remove("active");
                 menuToggle.setAttribute("aria-expanded", "false");
+                menuToggle.setAttribute("aria-label", "Open navigation menu");
                 menuToggle.textContent = "☰";
             });
         });
