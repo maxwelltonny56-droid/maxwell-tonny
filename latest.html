@@ -994,10 +994,11 @@
                     "\n\nMessage:\n" + message
                 );
 
-                window.location.href =
-                    "mailto:Maxwelltonny56@gmail.com" +
-                    "?subject=" + subject +
-                    "&body=" + body;
+                window.open(
+                 "https://mail.google.com/mail/?view=cm&to=Maxwelltonny56@gmail.com" +
+                 "&su=" + subject + "&body=" + body,
+                 "_blank"
+               );
             }
         );
     </script>
