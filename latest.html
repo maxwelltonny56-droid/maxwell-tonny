@@ -16,6 +16,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@property --primary{syntax:"<color>";inherits:true;initial-value:#c21e67}
+@property --primary-dark{syntax:"<color>";inherits:true;initial-value:#9d1553}
+@property --blob{syntax:"<color>";inherits:true;initial-value:#f9a8d4}
+@property --tint{syntax:"<color>";inherits:true;initial-value:#fde7f1}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px;-webkit-text-size-adjust:100%}
 :root{
@@ -23,6 +27,8 @@ html{scroll-behavior:smooth;scroll-padding-top:80px;-webkit-text-size-adjust:100
   --dark:#1e1b4b;--darker:#120f33;--light:#f6f4ff;--white:#fff;--text:#55537a;--line:#e6e1fa;
   --radius:18px;--shadow:0 10px 40px -12px rgba(30,27,75,.18);
   --ease:cubic-bezier(.22,1,.36,1);
+  --blob:#f9a8d4;--tint:#fde7f1;--glow:194,30,103;
+  transition:--primary .7s,--primary-dark .7s,--blob .7s,--tint .7s;
   --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 body{font-family:var(--font);background:var(--white);color:var(--dark);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -50,7 +56,7 @@ nav{min-height:72px;display:flex;align-items:center;justify-content:space-betwee
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;padding:13px 26px;border-radius:12px;font:inherit;font-weight:700;border:2px solid var(--primary);cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .25s,color .25s}
-.btn:hover{background:var(--primary-dark);border-color:var(--primary-dark);transform:translateY(-3px);box-shadow:0 12px 24px -8px rgba(194,30,103,.5)}
+.btn:hover{background:var(--primary-dark);border-color:var(--primary-dark);transform:translateY(-3px);box-shadow:0 12px 24px -8px rgba(var(--glow),.5)}
 .btn:active{transform:translateY(0)}
 .btn-outline{background:transparent;color:var(--primary);box-shadow:none}
 .btn-outline:hover{background:var(--primary);color:#fff}
@@ -59,9 +65,9 @@ nav{min-height:72px;display:flex;align-items:center;justify-content:space-betwee
 .buttons{display:flex;gap:14px;flex-wrap:wrap}
 
 /* Hero */
-.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#fde7f1 0%,#f3f0ff 60%,#eef0ff 100%);padding:clamp(56px,8vw,100px) 0}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--tint) 0%,#f3f0ff 60%,#eef0ff 100%);padding:clamp(56px,8vw,100px) 0}
 .hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;pointer-events:none;animation:float 14s ease-in-out infinite}
-.hero::before{width:340px;height:340px;background:#f9a8d4;top:-100px;right:-60px}
+.hero::before{width:340px;height:340px;background:var(--blob);top:-100px;right:-60px}
 .hero::after{width:280px;height:280px;background:#fde68a;bottom:-100px;left:-60px;animation-delay:-7s}
 @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,30px)}}
 .hero-content{position:relative;z-index:1;display:grid;grid-template-columns:1.3fr 1fr;align-items:center;gap:clamp(32px,6vw,70px)}
@@ -99,10 +105,19 @@ nav{min-height:72px;display:flex;align-items:center;justify-content:space-betwee
 .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
 .skill-card{text-align:center;padding:30px 22px}
 .skill-card:hover,.project-card:hover{transform:translateY(-8px);box-shadow:0 24px 50px -16px rgba(30,27,75,.28)}
-.skill-icon{width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;font-size:1.9rem;background:linear-gradient(135deg,#fde7f1,#fff4cc);border-radius:18px;transition:transform .5s var(--ease)}
+.skill-icon{width:72px;height:72px;margin:0 auto 16px;filter:drop-shadow(0 8px 14px rgba(30,27,75,.18));transition:transform .5s var(--ease)}
+.skill-icon svg{width:100%;height:100%;display:block}
 .skill-card:hover .skill-icon{transform:rotate(-8deg) scale(1.1)}
 .skill-card h3{margin-bottom:6px}
 .skill-card p{color:var(--text);font-size:.95rem}
+
+/* Illustrations (they follow the lamp's colour theme) */
+.art .bg{fill:var(--tint)}.art .p{fill:var(--primary)}.art .d{fill:var(--dark)}.art .w{fill:#fff}.art .a{fill:var(--accent)}
+.art .ln{fill:#e6e1fa}.art .bl{fill:var(--blob);opacity:.55}.art .sh{filter:drop-shadow(0 8px 12px rgba(30,27,75,.2))}
+.project-cover{display:block;width:100%;height:auto;border-radius:12px;margin-bottom:20px;transition:transform .5s var(--ease)}
+.project-card:hover .project-cover{transform:scale(1.03)}
+.edu-icon{width:56px;height:56px;margin-bottom:10px}
+.photo-fallback{overflow:hidden}.photo-fallback svg{width:100%;height:100%;display:block}
 
 /* Projects */
 .projects{background:var(--light)}
@@ -149,6 +164,32 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 .js .reveal.in{opacity:1;transform:none}
 .js .reveal.in.card:hover{transform:translateY(-8px)}
 
+/* Pull-cord lamp: pull to change the colour theme */
+.lamp-wrap{position:absolute;top:0;left:56%;z-index:2;width:120px;height:250px}
+.lamp{position:relative;width:120px;height:250px;transform-origin:60px 0;animation:swing 7s ease-in-out infinite}
+.lamp.pulled{animation:swing .9s ease-out}
+.lamp::before{content:"";position:absolute;left:50%;top:100px;width:440px;height:440px;margin:0 0 0 -220px;background:radial-gradient(circle,rgba(var(--glow),.32),transparent 65%);pointer-events:none;opacity:.55}
+.lamp.pulled::before{animation:flash .9s ease-out}
+.lamp svg{position:absolute;inset:0;width:100%;height:150px;overflow:visible}
+.bulb{fill:var(--accent);filter:drop-shadow(0 0 10px var(--accent))}
+.cord{position:absolute;left:4px;top:116px;width:44px;height:96px;background:none;border:0;cursor:pointer;transform-origin:50% 0}
+.cord::before{content:"";position:absolute;left:50%;top:0;bottom:12px;width:2px;margin-left:-1px;background:var(--dark)}
+.cord::after{content:"";position:absolute;left:50%;bottom:0;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.lamp.pulled .cord{animation:tug .5s var(--ease)}
+.lamp-hint{position:absolute;left:-8px;top:214px;font-size:.75rem;font-weight:700;color:var(--primary);white-space:nowrap;animation:bob 2s ease-in-out infinite;transition:opacity .4s}
+.lamp.used .lamp-hint{opacity:0;animation:none}
+@keyframes swing{0%,100%{transform:rotate(0)}25%{transform:rotate(2.5deg)}60%{transform:rotate(-2deg)}}
+.lamp.pulled{--sw:1}
+@keyframes tug{0%{transform:scaleY(1)}35%{transform:scaleY(1.4)}100%{transform:scaleY(1)}}
+@keyframes flash{0%{opacity:.25;transform:scale(.85)}30%{opacity:1;transform:scale(1.08)}100%{opacity:.55;transform:scale(1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* Cursor spotlight on cards */
+.card{position:relative}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--glow),.13),transparent 65%)}
+.card:hover::after{opacity:1}
+.contact .card::after{background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%),rgba(251,191,36,.16),transparent 65%)}
+
 /* Responsive */
 @media(max-width:900px){
   .projects-grid,.about-content,.contact-content{grid-template-columns:1fr}
@@ -157,6 +198,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
   .buttons{justify-content:center}
   .profile-wrapper{order:-1}
   .profile-frame{width:min(70%,260px)}
+  .lamp-wrap{left:auto;right:3%;transform:scale(.6);transform-origin:top right}
 }
 @media(max-width:760px){
   .menu-toggle{display:block}
@@ -198,6 +240,11 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 
 <main>
 <section class="hero" id="home">
+<div class="lamp-wrap"><div class="lamp" id="lamp">
+<svg viewBox="0 0 120 150" aria-hidden="true"><line x1="60" y1="0" x2="60" y2="46" stroke="#1e1b4b" stroke-width="3"/><path d="M22 118Q24 56 60 50Q96 56 98 118Z" fill="#1e1b4b"/><ellipse cx="60" cy="118" rx="38" ry="7" fill="#2d2a6e"/><circle class="bulb" cx="60" cy="124" r="9"/></svg>
+<button class="cord" id="cord" type="button" aria-label="Pull the cord to change the colour theme"></button>
+<span class="lamp-hint" aria-hidden="true">Pull me</span>
+</div></div>
 <div class="container hero-content">
 <div class="hero-text">
 <p class="welcome"> Welcome to my portfolio</p>
@@ -211,7 +258,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 <div class="profile-wrapper">
 <div class="profile-frame">
 <img src="profile.jpg" alt="Maxwell Tonny profile photo" class="profile-image" width="330" height="363" onerror="this.style.display='none';document.getElementById('photoFallback').style.display='flex';">
-<div id="photoFallback" class="photo-fallback" aria-hidden="true">MT</div>
+<div id="photoFallback" class="photo-fallback" aria-hidden="true"><svg class="art" viewBox="0 0 260 286" preserveAspectRatio="xMidYMid slice"><rect class="bg" width="260" height="286"/><circle class="bl" cx="205" cy="52" r="74"/><circle cx="40" cy="236" r="60" fill="#fde68a" opacity=".5"/><rect class="p" y="206" width="260" height="80" opacity=".16"/><rect x="48" y="86" width="164" height="108" rx="10" fill="#1e1b4b"/><rect x="56" y="94" width="148" height="92" rx="5" fill="#2d2a6e"/><rect class="a" x="68" y="108" width="36" height="6" rx="3"/><rect class="p" x="110" y="108" width="54" height="6" rx="3"/><rect fill="#fff" x="80" y="122" width="62" height="6" rx="3"/><rect fill="#4ade80" x="80" y="136" width="44" height="6" rx="3"/><rect class="a" x="130" y="136" width="30" height="6" rx="3"/><rect fill="#fff" x="68" y="150" width="70" height="6" rx="3"/><rect class="p" x="68" y="164" width="28" height="6" rx="3"/><path d="M30 194h200l-10 12H40z" fill="#3b3878"/><rect x="190" y="170" width="24" height="26" rx="5" class="w sh"/><path d="M214 176h6a5 5 0 010 12h-6" fill="none" stroke="#fff" stroke-width="3"/><path d="M26 196v-26" stroke="#15803d" stroke-width="3" stroke-linecap="round"/><path d="M26 176c-14-2-18-12-16-20 10 0 18 6 16 20zM26 170c10-2 16-10 14-18-10 0-16 6-14 18z" fill="#22c55e"/><rect x="16" y="192" width="20" height="14" rx="3" class="p"/></svg></div>
 </div>
 </div>
 </div>
@@ -251,11 +298,11 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 <p class="section-subtitle">Technologies and skills I am learning and developing.</p>
 </div>
 <div class="skills-grid">
-<div class="card skill-card reveal"><div class="skill-icon" aria-hidden="true"></div><h3>HTML</h3><p>Building the structure of websites.</p></div>
-<div class="card skill-card reveal" style="--d:.06s"><div class="skill-icon" aria-hidden="true"></div><h3>JavaScript</h3><p>Adding interaction and functionality to websites.</p></div>
-<div class="card skill-card reveal" style="--d:.12s"><div class="skill-icon" aria-hidden="true"></div><h3>Python</h3><p>Learning programming and problem-solving.</p></div>
-<div class="card skill-card reveal" style="--d:.18s"><div class="skill-icon" aria-hidden="true"></div><h3>Graphic Design</h3><p>Designing creative materials using Canva.</p></div>
-<div class="card skill-card reveal" style="--d:.24s"><div class="skill-icon" aria-hidden="true"></div><h3>GitHub</h3><p>Managing projects and publishing websites.</p></div>
+<div class="card skill-card reveal"><div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#e34f26"/><path d="M24 22 14 32l10 10M40 22l10 10-10 10" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 18 29 46" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></div><h3>HTML</h3><p>Building the structure of websites.</p></div>
+<div class="card skill-card reveal" style="--d:.06s"><div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#f7df1e"/><text x="50" y="52" text-anchor="end" font-family="Arial,sans-serif" font-size="30" font-weight="800" fill="#1e1b4b">JS</text></svg></div><h3>JavaScript</h3><p>Adding interaction and functionality to websites.</p></div>
+<div class="card skill-card reveal" style="--d:.12s"><div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#eef4ff"/><path d="M32 12c-9 0-9 4-9 8v6h18v3H19c-5 0-8 4-8 10s3 9 7 9h4v-6c0-4 3-7 7-7h12c3 0 6-3 6-6v-9c0-5-5-8-15-8z" fill="#3776ab"/><path d="M32 52c9 0 9-4 9-8v-6H23v-3h22c5 0 8-4 8-10s-3-9-7-9h-4v6c0 4-3 7-7 7H23c-3 0-6 3-6 6v9c0 5 5 8 15 8z" fill="#ffd43b"/><circle cx="27" cy="19" r="2.2" fill="#fff"/><circle cx="37" cy="45" r="2.2" fill="#1e1b4b"/></svg></div><h3>Python</h3><p>Learning programming and problem-solving.</p></div>
+<div class="card skill-card reveal" style="--d:.18s"><div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#fff4cc"/><path d="M32 11C19 11 10 20 10 31s9 22 21 22c4 0 5-3 3-6-2-4 0-7 4-7h8c4 0 8-3 8-8C54 19 44 11 32 11z" fill="#fff" stroke="#1e1b4b" stroke-width="3"/><circle cx="22" cy="28" r="4.5" fill="#ef4444"/><circle cx="32" cy="21" r="4.5" fill="#fbbf24"/><circle cx="43" cy="26" r="4.5" fill="#22c55e"/><circle cx="21" cy="40" r="4.5" fill="#3b82f6"/></svg></div><h3>Graphic Design</h3><p>Designing creative materials using Canva.</p></div>
+<div class="card skill-card reveal" style="--d:.24s"><div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1e1b4b"/><g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M22 18v28M22 30c0-6 6-8 12-8h4"/></g><g fill="#1e1b4b" stroke="#fff" stroke-width="4"><circle cx="22" cy="16" r="5"/><circle cx="22" cy="48" r="5"/><circle cx="42" cy="22" r="5"/></g></svg></div><h3>GitHub</h3><p>Managing projects and publishing websites.</p></div>
 </div>
 </div>
 </section>
@@ -269,6 +316,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 <div class="projects-grid">
 
 <article class="card project-card reveal">
+<svg class="project-cover art" viewBox="0 0 320 180" role="img" aria-label="Portfolio website preview"><rect class="bg" width="320" height="180"/><circle class="bl" cx="290" cy="14" r="52"/><rect class="w sh" x="36" y="22" width="248" height="140" rx="12"/><path class="d" d="M36 34a12 12 0 0112-12h224a12 12 0 0112 12v10H36z"/><circle class="p" cx="50" cy="33" r="3.5"/><circle class="a" cx="62" cy="33" r="3.5"/><circle cx="74" cy="33" r="3.5" fill="#4ade80"/><circle class="p" cx="82" cy="88" r="22"/><rect class="d" x="116" y="68" width="110" height="9" rx="4.5"/><rect class="ln" x="116" y="85" width="86" height="6" rx="3"/><rect class="ln" x="116" y="97" width="98" height="6" rx="3"/><rect class="p" x="116" y="113" width="46" height="14" rx="7"/><rect class="a" x="168" y="113" width="46" height="14" rx="7"/><rect class="ln" x="52" y="138" width="62" height="14" rx="5"/><rect class="ln" x="122" y="138" width="62" height="14" rx="5"/><rect class="ln" x="192" y="138" width="76" height="14" rx="5"/></svg>
 <span class="project-number">Project 01</span>
 <h3>Personal Portfolio Website</h3>
 <p>A personal website showcasing my background, skills, projects, and contact information.</p>
@@ -277,6 +325,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 </article>
 
 <article class="card project-card reveal" style="--d:.08s">
+<svg class="project-cover art" viewBox="0 0 320 180" role="img" aria-label="Attachment finder preview"><rect class="bg" width="320" height="180"/><circle class="bl" cx="290" cy="14" r="52"/><rect class="w sh" x="36" y="20" width="204" height="28" rx="14"/><circle cx="56" cy="34" r="6" fill="none" stroke="#1e1b4b" stroke-width="2.5"/><path d="m61 39 5 5" stroke="#1e1b4b" stroke-width="2.5" stroke-linecap="round"/><rect class="ln" x="76" y="31" width="90" height="6" rx="3"/><g opacity="1"><rect class="w sh" x="36" y="58" width="204" height="30" rx="10"/><rect class="p" x="46" y="64" width="18" height="18" rx="5"/><rect class="d" x="72" y="65" width="90" height="6" rx="3"/><rect class="ln" x="72" y="75" width="60" height="5" rx="2.5"/><rect class="a" x="190" y="67" width="38" height="12" rx="6"/></g><g opacity="1"><rect class="w sh" x="36" y="94" width="204" height="30" rx="10"/><rect class="p" x="46" y="100" width="18" height="18" rx="5"/><rect class="d" x="72" y="101" width="90" height="6" rx="3"/><rect class="ln" x="72" y="111" width="60" height="5" rx="2.5"/><rect class="a" x="190" y="103" width="38" height="12" rx="6"/></g><g opacity="0.6"><rect class="w sh" x="36" y="130" width="204" height="30" rx="10"/><rect class="p" x="46" y="136" width="18" height="18" rx="5"/><rect class="d" x="72" y="137" width="90" height="6" rx="3"/><rect class="ln" x="72" y="147" width="60" height="5" rx="2.5"/><rect class="a" x="190" y="139" width="38" height="12" rx="6"/></g><path class="p sh" d="M272 150c-14-18-22-28-22-40a22 22 0 0144 0c0 12-8 22-22 40z"/><circle class="w" cx="272" cy="110" r="8"/></svg>
 <span class="project-number">Project 02</span>
 <h3>Attachment Finder App</h3>
 <p>A project designed to help students across Kenya discover industrial attachment and internship opportunities posted by organizations.</p>
@@ -285,6 +334,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 </article>
 
 <article class="card project-card reveal">
+<svg class="project-cover art" viewBox="0 0 320 180" role="img" aria-label="Online shop preview"><rect class="bg" width="320" height="180"/><circle class="bl" cx="290" cy="14" r="52"/><g><rect class="w sh" x="36" y="20" width="76" height="62" rx="10"/><rect class="p" x="46" y="28" width="56" height="30" rx="6"/><rect class="ln" x="46" y="64" width="40" height="5" rx="2.5"/><rect class="d" x="46" y="72" width="22" height="5" rx="2.5"/></g><g><rect class="w sh" x="122" y="20" width="76" height="62" rx="10"/><rect class="a" x="132" y="28" width="56" height="30" rx="6"/><rect class="ln" x="132" y="64" width="40" height="5" rx="2.5"/><rect class="d" x="132" y="72" width="22" height="5" rx="2.5"/></g><g><rect class="w sh" x="36" y="94" width="76" height="62" rx="10"/><rect class="a" x="46" y="102" width="56" height="30" rx="6"/><rect class="ln" x="46" y="138" width="40" height="5" rx="2.5"/><rect class="d" x="46" y="146" width="22" height="5" rx="2.5"/></g><g><rect class="w sh" x="122" y="94" width="76" height="62" rx="10"/><rect class="p" x="132" y="102" width="56" height="30" rx="6"/><rect class="ln" x="132" y="138" width="40" height="5" rx="2.5"/><rect class="d" x="132" y="146" width="22" height="5" rx="2.5"/></g><rect class="w sh" x="214" y="20" width="72" height="136" rx="12"/><path d="M228 42h8l4 18h22l4-14h-30" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="242" cy="68" r="3.5" fill="#1e1b4b"/><circle cx="260" cy="68" r="3.5" fill="#1e1b4b"/><circle class="p" cx="272" cy="38" r="8"/><rect class="ln" x="226" y="90" width="48" height="6" rx="3"/><rect class="ln" x="226" y="102" width="34" height="6" rx="3"/><rect x="224" y="122" width="52" height="22" rx="11" fill="#16a34a"/><text x="250" y="137" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#fff">M-PESA</text></svg>
 <span class="project-number">Project 03</span>
 <h3>SmartBiz Shopping Website</h3>
 <p>An e-commerce demonstration featuring products, categories, search, a shopping cart, and M-PESA payment integration (sandbox).</p>
@@ -293,6 +343,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 </article>
 
 <article class="card project-card reveal" style="--d:.08s">
+<svg class="project-cover art" viewBox="0 0 320 180" role="img" aria-label="Food ordering preview"><rect class="bg" width="320" height="180"/><circle class="bl" cx="290" cy="14" r="52"/><ellipse class="w sh" cx="116" cy="140" rx="84" ry="20"/><path d="M62 110h108v6a10 10 0 01-10 10H72a10 10 0 01-10-10z" fill="#f59e0b"/><rect x="58" y="98" width="116" height="13" rx="6.5" fill="#7c3f1d"/><path class="a" d="M60 98h112l-10 12-14-10-14 10-14-10-14 10-14-10-14 10z"/><path d="M58 90c8-6 14 4 22 0s14 4 22 0 14 4 22 0 14 4 22 0 8 2 10 4v6H58z" fill="#22c55e"/><rect x="66" y="82" width="100" height="8" rx="4" fill="#ef4444"/><path d="M60 80c0-28 26-42 56-42s56 14 56 42z" fill="#f59e0b"/><g fill="#fde68a"><ellipse cx="96" cy="56" rx="4" ry="2"/><ellipse cx="116" cy="48" rx="4" ry="2"/><ellipse cx="136" cy="57" rx="4" ry="2"/><ellipse cx="106" cy="68" rx="4" ry="2"/><ellipse cx="128" cy="70" rx="4" ry="2"/></g><rect class="w sh" x="214" y="30" width="76" height="42" rx="12"/><rect class="ln" x="226" y="44" width="48" height="6" rx="3"/><rect class="ln" x="226" y="56" width="32" height="6" rx="3"/><rect x="200" y="90" width="90" height="50" rx="14" fill="#25d366"/><path d="M214 140l-8 14 20-8z" fill="#25d366"/><path d="m224 115 8 8 16-18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="268" y="120" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#fff">Order</text></svg>
 <span class="project-number">Project 04</span>
 <h3>Golden Bites Food Website</h3>
 <p>A food-ordering website for Golden Bites in Thika, where customers browse the menu and place orders through WhatsApp.</p>
@@ -311,6 +362,7 @@ footer{background:var(--darker);color:#d9d4ff;text-align:center;padding:28px 15p
 <p class="section-subtitle">My academic background.</p>
 </div>
 <div class="card education-card reveal">
+<svg class="edu-icon art" viewBox="0 0 64 64" aria-hidden="true"><path class="p" d="M32 12 60 26 32 40 4 26z"/><path class="d" d="M16 34v11c0 4 7 8 16 8s16-4 16-8V34L32 42z"/><path d="M56 28v16" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/><circle cx="56" cy="47" r="3.5" class="a"/></svg>
 <h3>Thika Technical Training Institute</h3>
 <p class="education-label">Diploma in Computer Science</p>
 <p>Currently pursuing studies in Computer Science, developing technical knowledge and practical skills in computing, programming, and information technology.</p>
@@ -404,6 +456,49 @@ if ("IntersectionObserver" in window) {
 } else {
   reveals.forEach(el => el.classList.add("in"));
 }
+
+/* Lamp: pull to cycle colour themes */
+const THEMES = [
+  ["#c21e67","#9d1553","#f9a8d4","#fde7f1","194,30,103"],
+  ["#b45309","#92400e","#fcd34d","#fef3c7","180,83,9"],
+  ["#0e7490","#155e75","#67e8f9","#cffafe","14,116,144"],
+  ["#15803d","#166534","#86efac","#dcfce7","21,128,61"],
+  ["#6d28d9","#5b21b6","#c4b5fd","#ede9fe","109,40,217"]
+];
+let themeIndex = 0;
+try { themeIndex = (parseInt(localStorage.getItem("theme"), 10) || 0) % THEMES.length; } catch (e) {}
+function applyTheme(i) {
+  const t = THEMES[i], r = document.documentElement.style;
+  r.setProperty("--primary", t[0]); r.setProperty("--primary-dark", t[1]);
+  r.setProperty("--blob", t[2]); r.setProperty("--tint", t[3]); r.setProperty("--glow", t[4]);
+}
+applyTheme(themeIndex);
+let audio;
+function tick() {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain(), n = audio.currentTime;
+    o.type = "square"; o.frequency.setValueAtTime(180, n);
+    g.gain.setValueAtTime(0.04, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.06);
+    o.connect(g); g.connect(audio.destination); o.start(n); o.stop(n + 0.07);
+  } catch (e) {}
+}
+const lamp = document.getElementById("lamp");
+document.getElementById("cord").addEventListener("click", function () {
+  lamp.classList.remove("pulled"); void lamp.offsetWidth; lamp.classList.add("pulled", "used");
+  themeIndex = (themeIndex + 1) % THEMES.length;
+  applyTheme(themeIndex); tick();
+  try { localStorage.setItem("theme", themeIndex); } catch (e) {}
+});
+
+/* Cursor spotlight on cards */
+document.querySelectorAll(".card").forEach(function (c) {
+  c.addEventListener("pointermove", function (e) {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    c.style.setProperty("--my", (e.clientY - r.top) + "px");
+  });
+});
 
 /* Contact form */
 function getFormData() {
