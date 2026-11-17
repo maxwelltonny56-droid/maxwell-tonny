@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Bites | Food Ordering</title>
+    <meta name="description" content="Golden Bites-Thika: order burgers, pizza, chicken, fries, pancakes and fresh juice online. Delivery in Thika, pay by M-Pesa or cash on delivery.">
+    <meta name="theme-color" content="#008000">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%94%3C/text%3E%3C/svg%3E">
 
     <style>
         * {
@@ -60,6 +62,24 @@
             padding: 2px 8px;
         }
 
+        /* Open / closed banner */
+        .status-bar {
+            padding: 10px 7%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .status-bar.open {
+            background: #e3f5e1;
+            color: #14501c;
+        }
+
+        .status-bar.closed {
+            background: #fde8e6;
+            color: #8f1d14;
+        }
+
         .hero {
             min-height: 350px;
             padding: 70px 7%;
@@ -100,6 +120,12 @@
             background: #f1a900;
         }
 
+        .btn:disabled {
+            background: #cfcfcf;
+            color: #777;
+            cursor: not-allowed;
+        }
+
         section {
             padding: 50px 7%;
         }
@@ -126,6 +152,11 @@
 
         .food-card:hover {
             transform: translateY(-5px);
+        }
+
+        .food-card.sold-out img {
+            filter: grayscale(1);
+            opacity: .6;
         }
 
         .food-card img {
@@ -179,11 +210,22 @@
             margin: 2px;
         }
 
-        .total {
+        .summary {
+            margin: 20px 0;
             text-align: right;
+        }
+
+        .summary .line {
+            font-size: 16px;
+            color: #555;
+            margin: 4px 0;
+        }
+
+        .summary .total {
             font-size: 22px;
             font-weight: bold;
-            margin: 20px 0;
+            color: #292929;
+            margin-top: 10px;
         }
 
         input, textarea, select {
@@ -195,6 +237,27 @@
         }
 
         label {
+            font-weight: bold;
+        }
+
+        .order-message {
+            margin-top: 18px;
+            padding: 0;
+        }
+
+        .order-message.success {
+            background: #e3f5e1;
+            color: #14501c;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .order-message.error {
+            background: #fde8e6;
+            color: #8f1d14;
+            padding: 14px;
+            border-radius: 8px;
             font-weight: bold;
         }
 
@@ -284,6 +347,8 @@
     </nav>
 </header>
 
+<div class="status-bar" id="status-bar" role="status"></div>
+
 <section class="hero" id="home">
     <h2>Delicious Food, Kula Nasi!</h2>
     <p>Your favourite meals, freshly prepared and ready to enjoy.</p>
@@ -303,8 +368,10 @@
             Your cart is empty. Add something delicious!
         </div>
 
-        <div class="total">
-            Total: KSh <span id="total">0</span>
+        <div class="summary">
+            <div class="line">Food: KSh <span id="subtotal">0</span></div>
+            <div class="line">Delivery: KSh <span id="delivery">0</span></div>
+            <div class="total">Total: KSh <span id="total">0</span></div>
         </div>
 
         <button class="btn" onclick="goToCheckout()">
@@ -355,10 +422,10 @@
                 <option value="Cash on delivery">Cash on delivery</option>
             </select>
 
-            <button type="submit" class="btn">Place Order</button>
+            <button type="submit" class="btn" id="place-order-btn">Place Order</button>
         </form>
 
-        <p id="order-message" role="status" style="margin-top:18px;"></p>
+        <p id="order-message" class="order-message" role="status"></p>
     </div>
 </section>
 
@@ -368,6 +435,7 @@
     <div style="text-align:center; line-height:2;">
         <p>Welcome to Golden Bites!</p>
         <p>📍 Location: Thika-opposite main stage, Kiambu County, Kenya</p>
+        <p>🕒 Orders open: <span id="hours-text"></span></p>
         <p>🍽️ Fresh food, friendly service.</p>
     </div>
 </section>
@@ -378,12 +446,36 @@
 </footer>
 
 <script>
+    // ============================================================
+    // SETTINGS: change these to match your business
+    // ============================================================
+
+    // Delivery fee in KSh (set to 0 for free delivery)
+    const DELIVERY_FEE = 100;
+
+    // Opening hours in Kenya time, 24-hour clock.
+    // Example: opens at 8 (8:00 AM) and stops taking orders at 21 (9:00 PM).
+    const OPEN_HOUR = 8;
+    const CLOSE_HOUR = 21;
+
+    // WhatsApp number with country code 254, no + sign
+    const RESTAURANT_WHATSAPP = "254758209823";
+
+    // Email that receives a copy of every order.
+    // Put your real email here, e.g. "yourname@gmail.com".
+    // Leave as "" to turn email off.
+    const ORDER_EMAIL = "";
+
+    // ============================================================
+
     // FOOD MENU
+    // Set soldOut: true on any item you have run out of.
     const foods = [
         {
             id: 1,
             name: "Beef Burger",
             price: 350,
+            soldOut: false,
             description: "Juicy burger with fresh vegetables.",
             image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
         },
@@ -391,6 +483,7 @@
             id: 2,
             name: "Pizza",
             price: 800,
+            soldOut: false,
             description: "Tasty pizza loaded with toppings.",
             image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80"
         },
@@ -398,6 +491,7 @@
             id: 3,
             name: "French Fries",
             price: 200,
+            soldOut: false,
             description: "Crispy golden fries.",
             image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80"
         },
@@ -405,6 +499,7 @@
             id: 4,
             name: "Chicken",
             price: 450,
+            soldOut: false,
             description: "Deliciously seasoned chicken.",
             image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80"
         },
@@ -412,6 +507,7 @@
             id: 5,
             name: "Pancakes",
             price: 250,
+            soldOut: false,
             description: "Soft pancakes for a sweet treat.",
             image: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=600&q=80"
         },
@@ -419,6 +515,7 @@
             id: 6,
             name: "Fresh Juice",
             price: 150,
+            soldOut: false,
             description: "Refreshing fruit juice.",
             image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80"
         }
@@ -427,11 +524,59 @@
     let cart = [];
 
     const foodMenu = document.getElementById("food-menu");
+    const orderMessage = document.getElementById("order-message");
+    const placeOrderBtn = document.getElementById("place-order-btn");
 
-    // RENDER FOOD MENU
+    // ---------- OPENING HOURS ----------
+
+    function formatHour(hour) {
+        const suffix = hour >= 12 && hour < 24 ? "PM" : "AM";
+        const h = hour % 12 === 0 ? 12 : hour % 12;
+        return `${h}:00 ${suffix}`;
+    }
+
+    function isOpenNow() {
+        // Always use Kenya time, whatever the customer's device says
+        const hour = parseInt(
+            new Intl.DateTimeFormat("en-GB", {
+                hour: "numeric",
+                hour12: false,
+                timeZone: "Africa/Nairobi"
+            }).format(new Date()),
+            10
+        ) % 24;
+
+        return hour >= OPEN_HOUR && hour < CLOSE_HOUR;
+    }
+
+    function updateOpenStatus() {
+        const bar = document.getElementById("status-bar");
+        const open = isOpenNow();
+
+        if (open) {
+            bar.className = "status-bar open";
+            bar.textContent =
+                `🟢 We are open and taking orders until ${formatHour(CLOSE_HOUR)}.`;
+        } else {
+            bar.className = "status-bar closed";
+            bar.textContent =
+                `🔴 We are closed right now. Orders open at ${formatHour(OPEN_HOUR)}.`;
+        }
+
+        placeOrderBtn.disabled = !open;
+        placeOrderBtn.textContent = open
+            ? "Place Order"
+            : `Closed. Opens ${formatHour(OPEN_HOUR)}`;
+    }
+
+    document.getElementById("hours-text").textContent =
+        `${formatHour(OPEN_HOUR)} to ${formatHour(CLOSE_HOUR)} every day`;
+
+    // ---------- RENDER FOOD MENU ----------
+
     foods.forEach(food => {
         foodMenu.innerHTML += `
-            <div class="food-card">
+            <div class="food-card ${food.soldOut ? "sold-out" : ""}">
                 <img src="${food.image}" alt="${food.name}" loading="lazy">
                 <div class="food-info">
                     <h3>${food.name}</h3>
@@ -439,18 +584,23 @@
                     <span class="price">
                         KSh ${food.price.toLocaleString()}
                     </span>
-                    <button class="btn" onclick="addToCart(${food.id})">
-                        Add to Cart
+                    <button
+                        class="btn"
+                        onclick="addToCart(${food.id})"
+                        ${food.soldOut ? "disabled" : ""}
+                    >
+                        ${food.soldOut ? "Sold out" : "Add to Cart"}
                     </button>
                 </div>
             </div>
         `;
     });
 
-    // ADD FOOD TO CART
+    // ---------- CART ----------
+
     function addToCart(id) {
         const food = foods.find(item => item.id === id);
-        if (!food) return;
+        if (!food || food.soldOut) return;
 
         const existing = cart.find(item => item.id === id);
 
@@ -463,7 +613,6 @@
         renderCart();
     }
 
-    // CHANGE FOOD QUANTITY
     function changeQuantity(id, amount) {
         const item = cart.find(item => item.id === id);
         if (!item) return;
@@ -477,19 +626,31 @@
         renderCart();
     }
 
-    // REMOVE ITEM
     function removeItem(id) {
         cart = cart.filter(item => item.id !== id);
         renderCart();
     }
 
-    // CLEAR ENTIRE CART
     function clearCart() {
         cart = [];
         renderCart();
     }
 
-    // UPDATE CART DISPLAY AND TOTAL
+    function getSubtotal() {
+        return cart.reduce(
+            (sum, item) => sum + item.price * item.quantity, 0
+        );
+    }
+
+    // Delivery fee only applies when there is something in the cart
+    function getDeliveryFee() {
+        return cart.length > 0 ? DELIVERY_FEE : 0;
+    }
+
+    function getTotal() {
+        return getSubtotal() + getDeliveryFee();
+    }
+
     function renderCart() {
         const container = document.getElementById("cart-items");
 
@@ -497,13 +658,13 @@
             (sum, item) => sum + item.quantity, 0
         );
 
-        const total = cart.reduce(
-            (sum, item) => sum + item.price * item.quantity, 0
-        );
-
         document.getElementById("cart-count").textContent = count;
+        document.getElementById("subtotal").textContent =
+            getSubtotal().toLocaleString();
+        document.getElementById("delivery").textContent =
+            getDeliveryFee().toLocaleString();
         document.getElementById("total").textContent =
-            total.toLocaleString();
+            getTotal().toLocaleString();
 
         if (cart.length === 0) {
             container.textContent =
@@ -539,7 +700,6 @@
         `).join("");
     }
 
-    // SCROLL TO CHECKOUT
     function goToCheckout() {
         if (cart.length === 0) {
             alert("Please add food to your cart first!");
@@ -551,7 +711,8 @@
         });
     }
 
-    // HAMBURGER MENU
+    // ---------- HAMBURGER MENU ----------
+
     const menuToggle = document.getElementById("menu-toggle");
     const navMenu = document.getElementById("nav-menu");
 
@@ -566,7 +727,6 @@
         );
     });
 
-    // CLOSE MENU AFTER CLICKING A NAVIGATION LINK
     navMenu.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", function () {
             navMenu.classList.remove("active");
@@ -576,60 +736,128 @@
         });
     });
 
-    // WHATSAPP ORDER CHECKOUT
+    // ---------- ORDER MESSAGE ----------
+
+    function showMessage(text, type) {
+        orderMessage.textContent = text;
+        orderMessage.className = "order-message " + type;
+    }
+
+    function buildOrderText(order) {
+        const lines = order.items.map(item =>
+            `${item.name} x ${item.quantity} - KSh ${
+                (item.price * item.quantity).toLocaleString()
+            }`
+        ).join("\n");
+
+        return (
+            `Name: ${order.name}\n` +
+            `Phone: ${order.phone}\n` +
+            `Location: ${order.address}\n` +
+            `Payment: ${order.payment}\n\n` +
+            `Order:\n${lines}\n\n` +
+            `Food: KSh ${order.subtotal.toLocaleString()}\n` +
+            `Delivery: KSh ${order.delivery.toLocaleString()}\n` +
+            `Total: KSh ${order.total.toLocaleString()}`
+        );
+    }
+
+    // Sends a copy of the order to your email (runs quietly in the background)
+    function sendEmailCopy(order) {
+        if (!ORDER_EMAIL) return;
+
+        fetch("https://formsubmit.co/ajax/" + encodeURIComponent(ORDER_EMAIL), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                _subject: `New Golden Bites order from ${order.name}`,
+                _template: "box",
+                _captcha: "false",
+                name: order.name,
+                phone: order.phone,
+                order_details: buildOrderText(order)
+            })
+        }).catch(function () {
+            // WhatsApp is the main channel, so a failed email copy is ignored
+        });
+    }
+
+    // ---------- PLACE ORDER ----------
+
     document.getElementById("order-form").addEventListener(
         "submit",
         function (event) {
             event.preventDefault();
+
+            if (!isOpenNow()) {
+                updateOpenStatus();
+                showMessage(
+                    `Sorry, we are closed right now. Orders open at ${formatHour(OPEN_HOUR)}.`,
+                    "error"
+                );
+                return;
+            }
 
             if (cart.length === 0) {
                 alert("Your cart is empty! Add food before placing an order.");
                 return;
             }
 
-            const name = document.getElementById("customer").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const address = document.getElementById("address").value.trim();
-            const payment = document.getElementById("payment").value;
-
-            const total = cart.reduce(
-                (sum, item) => sum + item.price * item.quantity, 0
-            );
-
-            const orderDetails = cart.map(item =>
-                `${item.name} x ${item.quantity} - KSh ${
-                    (item.price * item.quantity).toLocaleString()
-                }`
-            ).join("\n");
+            const order = {
+                name: document.getElementById("customer").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                address: document.getElementById("address").value.trim(),
+                payment: document.getElementById("payment").value,
+                items: cart.map(item => ({ ...item })),
+                subtotal: getSubtotal(),
+                delivery: getDeliveryFee(),
+                total: getTotal()
+            };
 
             const message =
                 `Hello Golden Bites! I want to place an order.\n\n` +
-                `Name: ${name}\n` +
-                `Phone: ${phone}\n` +
-                `Location: ${address}\n` +
-                `Payment: ${payment}\n\n` +
-                `Order:\n${orderDetails}\n\n` +
-                `Total: KSh ${total.toLocaleString()}`;
-
-            // Replace with the real business WhatsApp number.
-            // Use country code 254 without the + sign.
-            const restaurantWhatsApp = "254758209823";
+                buildOrderText(order);
 
             const whatsappURL =
-                `https://wa.me/${restaurantWhatsApp}?text=${
+                `https://wa.me/${RESTAURANT_WHATSAPP}?text=${
                     encodeURIComponent(message)
                 }`;
 
-            document.getElementById("order-message").textContent =
-                "WhatsApp is opening with your order. " +
-                "Review the details and press Send to submit it.";
+            // Open WhatsApp first, straight from the click, so phones do not block it
+            const popup = window.open(whatsappURL, "_blank");
 
-            window.open(whatsappURL, "_blank");
+            if (!popup) {
+                showMessage(
+                    "WhatsApp did not open. Please allow pop-ups for this page and press Place Order again.",
+                    "error"
+                );
+                return;
+            }
+
+            // Email copy for the restaurant
+            sendEmailCopy(order);
+
+            // Clear everything so the same order is not sent twice
+            cart = [];
+            renderCart();
+            document.getElementById("order-form").reset();
+
+            showMessage(
+                "✅ Order ready! In WhatsApp, press Send to confirm it. " +
+                "We will call or message you to confirm delivery.",
+                "success"
+            );
         }
     );
 
-    // INITIALIZE CART
+    // ---------- START UP ----------
+
     renderCart();
+    updateOpenStatus();
+    setInterval(updateOpenStatus, 60000);
 </script>
 
 </body>
